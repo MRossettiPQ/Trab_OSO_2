@@ -3,16 +3,18 @@
     gcc main.c -o -lssl -lcrypto main
 */
 
-#include "inode.h"
-#include "sha256.c"
-#include <openssl/evp.h>
-#include <openssl/ssl.h>
-#include <openssl/rsa.h>
-#include <openssl/x509.h>
+#include <openssl/evp.h>                                         // 
+#include <openssl/ssl.h>                                         // 
+#include <openssl/rsa.h>                                         // 
+#include <openssl/x509.h>                                        // 
 
+#include "inode.h"                                               // 
+#include "sha256.h"                                              // 
 
 //Declaração função
 
+
+//Função principal
 int main()
 {
 
