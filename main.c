@@ -1,6 +1,7 @@
 /*
     Para compilar no terminal use:
     gcc main.c -o -lssl -lcrypto main
+    para executar ./main
 */
 #include <stdio.h>
 //Importa arquivos pasta
@@ -17,7 +18,6 @@
 //Função principal
 int main()
 {
-    //FILE *pathArquivo;
     INODE Teste;
 
     
@@ -28,8 +28,6 @@ int main()
     Teste.IS_USED;
     Teste.NAME;
     Teste.SIZE;
-
-    //pathArquivo = "/";
     printf("TESTES");
     printf("DIRECT_BLOCKS: %hhn", Teste.DIRECT_BLOCKS);
     printf("DOUBLE_INDIRECT_BLOCKS: %hhn", Teste.DOUBLE_INDIRECT_BLOCKS);
@@ -39,6 +37,9 @@ int main()
     printf("NAME: %s", Teste.NAME);
     printf("SIZE: %d", Teste.SIZE);
 
+
+    //FILE *pathArquivo;
+    //pathArquivo = "/";
     //printSha256(pathArquivo);
 	return 0;	
 }
