@@ -2,6 +2,11 @@
     Para compilar no terminal use:
     gcc main.c -o main -lssl -lcrypto 
     para executar ./main
+    para init       - ./main init fs.bin
+    para add        - ./main add fs.bin
+    para addDir     - ./main addDir fs.bin
+    para sha256     - ./main sha256 fs.bin
+    para debug      - ./main debug fs.bin
 */
 //Importa arquivos pasta
 #include "biblioteca.h"                                                  // 
