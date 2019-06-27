@@ -2,6 +2,8 @@
 #define biblioteca_h
 
     //
+    #define _POSIX_SOURCE
+    #include <unistd.h>
     #include <stdio.h>
     #include <string.h>                                                 //strlen
     #include <stdlib.h>                                                 //strlen

@@ -18,17 +18,17 @@
 //Declaração função
 FILE*   criaSistemaArquivos     (char argc, char ** argv);
 void    verificaArquivo         (char argc, char ** argv);
+void    debugArquivo            (char argc, char ** argv);
 
 
 //Função principal
 int main(char argc, char ** argv)
 {
     FILE* arqDisco;
-    char cmdCC[35], auxSprintf, *questiona = (char*)malloc(sizeof(char));
+    char cmdCC[90], auxSprintf, *questiona = (char*)malloc(sizeof(char));
     printf("\nResposta: %s", questiona);
 
-    do
-    {
+
         printf("\n Decide a função");
         if(0 == strcmp(argv[1], "init"))
         {
@@ -50,9 +50,12 @@ int main(char argc, char ** argv)
         else if(0 == strcmp(argv[1], "sha256"))
         {
             // IMPRIME A HASH               - sha256 "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
+            char cwd[256];
+            getcwd(cwd, sizeof(cwd));
             printf("\n Imprime a HASH");
             verificaArquivo(argc, argv);                                //Verifica se o .bin passado existe
-            auxSprintf = sprintf(cmdCC, "/%s", argv[2]);                //Gera o path para o arquivo desejado
+            auxSprintf = sprintf(cmdCC, "%s/%s", cwd, argv[2]);         //Gera o path para o arquivo desejado
+            printf("\n\nPath: %s", cmdCC);
             printf("\n\nHash: ");
             printSha256(cmdCC);                                         //Imprime a HASH
         }
@@ -60,17 +63,31 @@ int main(char argc, char ** argv)
         {
             // IMPRIME DADOS DO Bin         - debug "nome arquivo.bin"
             printf("\n Imprime os metadados do 'DISCO'");
+            debugArquivo(argc, argv);
         }
+
+    /*do
+    {
+        //Caso queira fazer programa continuo
         printf("\nDeseja executar outro comando?\n");
 			scanf("%s", questiona);
-        //printf("\nDeseja executar outro comando? (1 - Para SIM          /2 - Para Não)\n");
-		//	scanf("%i", &quesNum);
+			scanf(" %s", argv[1]); //Função
+			scanf(" %s", argv[2]); //Nome do arquivo
+			scanf(" %s", argv[3]); //
+            scanf(" %s", argv[4]); //
+            scanf(" %s", argv[5]); //Nr. Inode
     } while((0 == strcmp(questiona, "s")) || (0 == strcmp(questiona, "S")) || (0 == strcmp(questiona, "SIM")) || (0 == strcmp(questiona, "sI")) || (0 == strcmp(questiona, "SI")) || (0 == strcmp(questiona, "Sim")));
+    */
+
     printf("\n=============FIM DO PROGRAMA=============\n\n");
 
 	return 0;	
 }
 //Implementa função
+void    debugArquivo        (char argc, char ** argv)                   //Função para impressão dos espaços de memoria, apenas para efeito comparativo
+{
+    printf("\n O Arquivo contem \n\n");
+}  
 void    verificaArquivo     (char argc, char ** argv)                   //Função para detectar o arquivo .bin passado como argumento, e cria-lo caso não exista
 {
     char cmdCC[35], auxSprintf;
