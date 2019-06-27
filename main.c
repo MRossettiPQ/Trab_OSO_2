@@ -46,37 +46,37 @@ int main(char argc, char ** argv)
 //Implementa função
 void verificaArquivo(char argc, char ** argv)
 {
-    char *cmdCC, n;
+    char cmdCC[35], n;
     
-    FILE *fp;
-    fp = fopen(argv[2], "r");
-    //VERIFICA ARQUIVO .bin NO DIRETORIO
-    if (fp!=NULL)
+    FILE *arquivo;  
+    arquivo = fopen(argv[2], "r");
+    
+    if (arquivo != NULL)                                                //VERIFICA ARQUIVO .bin NO DIRETORIO
     { 
         printf("\n Arquivo no diretorio");
     }
     else
     {
         printf("\n Arquivo inexistente");
-        n = sprintf(cmdCC, "touch %s", argv[2]);
-        system(cmdCC);
+        n = sprintf(cmdCC, "touch %s", argv[2]);                        //Gera o comando para criar o .bin
+        system(cmdCC);                                                  //Convoca o comando para o sistema
         printf("\n Arquivo gerado");
     }
 }
 
 FILE* criaSistemaArquivos(char argc, char ** argv)
 {
-    verificaArquivo(argc, argv);
-    FILE *arquivo;
+    verificaArquivo(argc, argv);                                        //Chama a verificação do arquivo .bin
+    FILE *arquivo;                                                      
 
     arquivo = fopen(argv[2],"r");
-    if (arquivo!=NULL)
+    if (arquivo!=NULL)                                                  //VERIFICA ARQUIVO .bin NO DIRETORIO
     {
         //fwrite(&meta, sizeof(struct metadata), 1, arquivo);
     }
     else
     {
-        printf("\nArquivo não foi encontrado \n");
+        printf("\n Arquivo não foi encontrado \n");
     }
     
 
