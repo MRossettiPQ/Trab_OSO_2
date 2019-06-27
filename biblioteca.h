@@ -15,6 +15,6 @@
     #include <openssl/x509.h>                                           //
     //Importa arquivos pasta 
     #include "inode.h"                                                  // 
-    #include "sha256.h"                                                 // 
+    #include "sha256.c"                                                 // 
 
 #endif /* biblioteca_h */
