@@ -7,6 +7,11 @@
     para addDir     - ./main addDir fs.bin
     para sha256     - ./main sha256 fs.bin
     para debug      - ./main debug fs.bin
+    Caso queira pegar as hash de varios arquivos para efeito de comparação: https://md5file.com/calculator
+    fs.bin              zerada  - hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    fs-case4.bin        dados   - hash: 5e943f87291a49124b76aba868e278a11a5b99c56964e0039bd178e37217d619
+    fs-case5.bin        dados   - hash: 42e371527570e3107ea3ebe9cec94bc47169c153fb53438d963c8008651dd39e
+    fs-case6.bin        dados   - hash: a54859682dcd9d4c15d0927da68c502b62ff8cc9032e6acdb7de4398d2399e84
 */
 //Importa arquivos pasta
 #include "biblioteca.h"                                                  // 
