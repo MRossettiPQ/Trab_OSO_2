@@ -1,5 +1,9 @@
 {
     "files.associations": {
-        "iostream": "c"
-    }
+        "iostream": "c",
+        "sha256.c": "cpp",
+        "biblioteca.h": "c",
+        "ios": "c"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }
