@@ -72,6 +72,9 @@ int main(char argc, char ** argv)
 void    debugArquivo        (char argc, char ** argv)                           //Função para impressão dos espaços de memoria, apenas para efeito comparativo
 {
     printf("\n O Arquivo contem \n\n");
+    printf("OFFSET\t\t01  02  03  04  05  06  07  08  09  0A  0B  0C  0D  0E  0F\t\tTEXTO DECODIFICADO");
+
+
 }  
 void    verificaArquivo     (char argc, char ** argv)                           //Função para detectar o arquivo .bin passado como argumento, e cria-lo caso não exista
 {
@@ -97,10 +100,34 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
 {
     verificaArquivo(argc, argv);                                                //Chama a verificação do arquivo .bin
     FILE *arquivo;                                                      
-
-    arquivo = fopen(argv[2],"r");
+    
+    arquivo = fopen(argv[2],"rb+");
     if (arquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
     {
+        INODE novoINUDE;
+        int pos = 0, posD;
+        char *conteudo = (char*)malloc(5*(sizeof(char)));
+
+        novoINUDE.IS_USED                   =   0x01;
+        novoINUDE.IS_DIR                    =   0x00;
+        novoINUDE.SIZE                      =   5;
+        scanf                                                                                       
+        fseek(arquivo, pos, 0);
+        fputs(TAMBLOCO, arquivo);
+        fputs(NUMBLOCO, arquivo);
+        fputs(NUMINODE, arquivo);
+        fputs(MAPABITS, arquivo);
+        fputs(VETORINO, arquivo);
+        fputs(DIRAIZ, arquivo);
+        fputs(VETORAIZ, arquivo);
+
+        // CRIA SISTEMA DE ARQUIVO      - init "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes" 
+        // init fs.bin 5 10 2
+        /*
+
+        */
+
+
         //fwrite(&meta, sizeof(struct metadata), 1, arquivo);
     }
     else
