@@ -195,21 +195,15 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         // init fs.bin 5 10 2
         INODE novoINODE;
         int pos = 0, posD;
-        char TamanhoBloco[1], NumeroBloco[1], NumeroInode[1], *conteudo = (char*)malloc(5*(sizeof(char)));                                                                          
-        fseek(arquivo, pos, 0);
-
-        strcpy(TamanhoBloco, argv[3]);                                          //Tamanho dos blocos
-        strcpy(NumeroBloco, argv[3]);                                           //Numero de blocos
-        strcpy(NumeroInode, argv[3]);                                           //Numero de Inodes
-        strcpy(novoINODE.SIZE, "1024");
-        strcpy(novoINODE.SIZE, "1");
-        strcpy(novoINODE.SIZE, "0");
+        printf("\n Tamanho Bloco: %s \n Numero de Bloco: %s \n Numero Inode: %s", argv[3], argv[4], argv[5]);
+        printf("\n Size: %d \n IS_USED: %d \n IS_DIR: %d", novoINODE.SIZE, novoINODE.IS_USED, novoINODE.IS_DIR);
         
-        fwrite(&TamanhoBloco, sizeof(int), 1, arquivo);
-        fwrite(&NumeroBloco, sizeof(int), 1, arquivo);
-        fwrite(&NumeroInode, sizeof(int), 1, arquivo);
-        fwrite(&novoINODE, sizeof(INODE), 1, arquivo);
-        //fwrite(&meta, sizeof(struct metadata), 1, arquivo);
+        strcpy(novoINODE.NAME, "MATHEUS");                                                           
+        fseek(arquivo, pos, 0);
+        fwrite(&argv[3], sizeof(int), 1, arquivo);                              //Adiciona Tamanho dos blocos no Arquivo .Bin
+        fwrite(&argv[4], sizeof(int), 1, arquivo);                              //Adiciona Numero de blocos no Arquivo .Bin
+        fwrite(&argv[5], sizeof(int), 1, arquivo);                              //Adiciona Numero de Inodes no Arquivo .Bin
+        fwrite(&novoINODE, sizeof(INODE), 1, arquivo);                          //Adiciona Inode no Arquivo .Bin
     }
     else
     {
