@@ -173,11 +173,13 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         int pos = 0, posD;
         char *conteudo = (char*)malloc(5*(sizeof(char)));
 
-        novoINUDE.IS_USED                   =   0x01;
-        novoINUDE.IS_DIR                    =   0x00;
-        novoINUDE.SIZE                      =   5;
+        novoINUDE->IS_USED                   =   0x01;
+        novoINUDE->IS_DIR                    =   0x00;
+        novoINUDE->SIZE                      =   5;
         //scanf                                                                                       
         fseek(arquivo, pos, 0);
+        fputs(novoINUDE->IS_USED, arquivo);
+        fputs(novoINUDE->SIZE, arquivo);
         //fputs(TAMBLOCO, arquivo);
         //fputs(NUMBLOCO, arquivo);
         //fputs(NUMINODE, arquivo);
