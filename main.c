@@ -68,7 +68,6 @@ int main(char argc, char ** argv)
         printf("\n Imprime os metadados do 'DISCO'");
         debugArquivo(argc, argv);
     }
-
     printf("\n=============FIM DO PROGRAMA=============\n\n");
 
 	return 0;	
@@ -145,13 +144,13 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         novoINUDE.SIZE                      =   5;
         scanf                                                                                       
         fseek(arquivo, pos, 0);
-        fputs(TAMBLOCO, arquivo);
-        fputs(NUMBLOCO, arquivo);
-        fputs(NUMINODE, arquivo);
-        fputs(MAPABITS, arquivo);
-        fputs(VETORINO, arquivo);
-        fputs(DIRAIZ, arquivo);
-        fputs(VETORAIZ, arquivo);
+        //fputs(TAMBLOCO, arquivo);
+        //fputs(NUMBLOCO, arquivo);
+        //fputs(NUMINODE, arquivo);
+        //fputs(MAPABITS, arquivo);
+        //fputs(VETORINO, arquivo);
+        //fputs(DIRAIZ, arquivo);
+        //fputs(VETORAIZ, arquivo);
 
         // CRIA SISTEMA DE ARQUIVO      - init "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes" 
         // init fs.bin 5 10 2
