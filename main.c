@@ -20,9 +20,9 @@
 FILE*   criaSistemaArquivos     (char argc, char ** argv);
 FILE*   direSistemaArquivos     (char argc, char ** argv);
 FILE*   fileSistemaArquivos     (char argc, char ** argv);
-char    criaPath                ();
 void    verificaArquivo         (char argc, char ** argv);
 void    debugArquivo            (char argc, char ** argv);
+int     inodeLivre              (FILE* arquivo);
 
 
 //Função principal
@@ -59,9 +59,9 @@ int main(char argc, char ** argv)
         char pathSis[256];
         // IMPRIME A HASH               - sha256 "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
         printf("\n Imprime a HASH");
-        getcwd(pathSis, sizeof(pathSis));
+        getcwd(pathSis, sizeof(pathSis));                                   //Busca o PATH do diretorio do programa
         verificaArquivo(argc, argv);                                        //Verifica se o .bin passado existe
-        auxSprintf = sprintf(cmdCC, "%s/%s", pathSis, argv[2]);             //Gera o path para o arquivo desejado
+        auxSprintf = sprintf(cmdCC, "%s/%s", pathSis, argv[2]);             //Gera o PATH para o arquivo desejado
         printf("\n\nPath: %s\n\nHash: ", cmdCC);                            //Imprime o PATH do diretorio do programa
         printSha256(cmdCC);                                                 //Imprime a HASH
     }
@@ -103,6 +103,30 @@ void    debugArquivo        (char argc, char ** argv)                           
         }
     }
     fclose(arquivo);
+}
+int     inodeLivre              (FILE* arquivo)
+{
+	char aux = 0;
+	int contX = 0, idInode = 0;
+	fseek(arquivo, B_LIVRES, SEEK_SET);
+	
+	for (contX = 0; contX < N_INODE; contX++)
+	{
+		fread(&idInode, sizeof(int), 1, arquivo);
+		aux++;
+		
+		if (idInode == 0x00)
+		{
+			fseek(arquivo, -sizeof(int), SEEK_CUR);
+			fprintf(arquivo,"%c",aux);
+			return aux;
+		}
+		
+		if (contX < N_INODE-1)
+        {
+			fseek(arquivo, sizeof(INODE)-sizeof(int), SEEK_CUR);
+	    }
+    }
 }
 void    verificaArquivo     (char argc, char ** argv)                           //Função para detectar o arquivo .bin passado como argumento, e cria-lo caso não exista
 {
@@ -169,11 +193,12 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
     {
         // CRIA SISTEMA DE ARQUIVO      - init "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
         // init fs.bin 5 10 2
-        INODE novoINUDE;
+        INODE novoINODE;
         int pos = 0, posD;
         char *conteudo = (char*)malloc(5*(sizeof(char)));                                                                          
         fseek(arquivo, pos, 0);
 
+        
 
         //fwrite(&meta, sizeof(struct metadata), 1, arquivo);
     }
