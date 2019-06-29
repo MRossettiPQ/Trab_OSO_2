@@ -9,6 +9,7 @@
     para debug      - ./main debug fs.bin
     Caso queira pegar as hash de varios arquivos para efeito de comparação: https://md5file.com/calculator
     fs.bin              zerada  - hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    disco.bin           dados   - hash: 0f3c42a06b8055af98b733bfa1186e4245157c09a404a7151ec13469c83c3f3b
     fs-case4.bin        dados   - hash: 5e943f87291a49124b76aba868e278a11a5b99c56964e0039bd178e37217d619
     fs-case5.bin        dados   - hash: 42e371527570e3107ea3ebe9cec94bc47169c153fb53438d963c8008651dd39e
     fs-case6.bin        dados   - hash: a54859682dcd9d4c15d0927da68c502b62ff8cc9032e6acdb7de4398d2399e84
@@ -55,10 +56,12 @@ int main(char argc, char ** argv)
     }    
     else if(0 == strcmp(argv[1], "sha256"))
     {
+        char pathSis[256];
         // IMPRIME A HASH               - sha256 "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
         printf("\n Imprime a HASH");
+        getcwd(pathSis, sizeof(pathSis));
         verificaArquivo(argc, argv);                                        //Verifica se o .bin passado existe
-        auxSprintf = sprintf(cmdCC, "%s/%s", criaPath(), argv[2]);          //Gera o path para o arquivo desejado
+        auxSprintf = sprintf(cmdCC, "%s/%s", pathSis, argv[2]);             //Gera o path para o arquivo desejado
         printf("\n\nPath: %s\n\nHash: ", cmdCC);                            //Imprime o PATH do diretorio do programa
         printSha256(cmdCC);                                                 //Imprime a HASH
     }
@@ -73,18 +76,35 @@ int main(char argc, char ** argv)
 	return 0;	
 }
 //Implementa função
-char    criaPath            ()
-{
-    char pathSis[256];
-    getcwd(pathSis, sizeof(pathSis));
-    return pathSis;
-}
 void    debugArquivo        (char argc, char ** argv)                           //Função para impressão dos espaços de memoria, apenas para efeito comparativo
 {
+    verificaArquivo(argc, argv);        
     printf("\n O Arquivo contem \n\n");
     printf("OFFSET\t\t01  02  03  04  05  06  07  08  09  0A  0B  0C  0D  0E  0F\t\tTEXTO DECODIFICADO");
-
-
+    char valor;
+    int offset = 0000000, cont = 0;
+    FILE *arquivo; 
+    arquivo = fopen(argv[2], "r");
+    
+    if (arquivo != NULL)                                                        //VERIFICA ARQUIVO .bin NO DIRETORIO
+    { 
+        printf("\n Arquivo no diretorio");
+    }
+    else
+    {
+        printf("\n%i\t\t", offset);
+        while(fscanf(arquivo, "%c", &valor) != EOF)
+        {
+            printf("%c  ");
+            offset = offset + 00000001;
+            if(cont == 15)
+            {
+                printf("\n%i\t\t", );
+                printf("\n%i\t\t", offset);
+            }
+        }
+    }
+    fclose(arquivo);
 }
 void    verificaArquivo     (char argc, char ** argv)                           //Função para detectar o arquivo .bin passado como argumento, e cria-lo caso não exista
 {
@@ -104,7 +124,9 @@ void    verificaArquivo     (char argc, char ** argv)                           
         system(cmdCC);                                                          //Convoca o comando para o sistema
         printf("\n Arquivo gerado\n\n");
     }
+    fclose(arquivo);
 }
+
 FILE*   direSistemaArquivos (char argc, char ** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
 {
     verificaArquivo(argc, argv);                                                //Chama a verificação do arquivo .bin
@@ -113,9 +135,15 @@ FILE*   direSistemaArquivos (char argc, char ** argv)                           
     if (arquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
     {
         
+    }    
+    else
+    {
+
     }
+
     return arquivo;
 }
+
 FILE*   fileSistemaArquivos (char argc, char ** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
 {
     verificaArquivo(argc, argv);                                                //Chama a verificação do arquivo .bin
@@ -125,8 +153,14 @@ FILE*   fileSistemaArquivos (char argc, char ** argv)                           
     {
 
     }
+    else
+    {
+
+    }
+
     return arquivo;
 }
+
 FILE*   criaSistemaArquivos (char argc, char ** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
 {
     verificaArquivo(argc, argv);                                                //Chama a verificação do arquivo .bin
@@ -165,7 +199,6 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
     {
         printf("\n Arquivo não foi encontrado \n");
     }
-    
 
     return arquivo;
 }
