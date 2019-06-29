@@ -93,13 +93,13 @@ void    debugArquivo        (char argc, char ** argv)                           
     else
     {
         printf("\n%i\t\t", offset);
-        while(fscanf(arquivo, "%c", &valor) != EOF)
+        while(fscanf(arquivo, "%s", &valor) != EOF)
         {
-            printf("%c  ");
+            printf("%s  ");
             offset = offset + 00000001;
             if(cont == 15)
             {
-                printf("\n%i\t\t", );
+                printf("\n'TEXTO DECODIFICADO'", );
                 printf("\n%i\t\t", offset);
             }
         }
@@ -176,7 +176,7 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         novoINUDE.IS_USED                   =   0x01;
         novoINUDE.IS_DIR                    =   0x00;
         novoINUDE.SIZE                      =   5;
-        scanf                                                                                       
+        //scanf                                                                                       
         fseek(arquivo, pos, 0);
         //fputs(TAMBLOCO, arquivo);
         //fputs(NUMBLOCO, arquivo);
