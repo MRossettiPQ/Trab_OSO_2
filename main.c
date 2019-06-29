@@ -167,30 +167,12 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
     arquivo = fopen(argv[2],"rb+");
     if (arquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
     {
+        // CRIA SISTEMA DE ARQUIVO      - init "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
+        // init fs.bin 5 10 2
         INODE novoINUDE;
         int pos = 0, posD;
-        char *conteudo = (char*)malloc(5*(sizeof(char)));
-
-        novoINUDE.IS_USED                   =   0x01;
-        novoINUDE.DIRECT_BLOCKSIS_DIR                    =   0x00;
-        novoINUDE.SIZE                      =   5;
-        //scanf                                                                                       
+        char *conteudo = (char*)malloc(5*(sizeof(char)));                                                                          
         fseek(arquivo, pos, 0);
-        //fputs(novoINUDE.IS_USED, arquivo);
-        //fputs(novoINUDE.SIZE, arquivo);
-        //fputs(TAMBLOCO, arquivo);
-        //fputs(NUMBLOCO, arquivo);
-        //fputs(NUMINODE, arquivo);
-        //fputs(MAPABITS, arquivo);
-        //fputs(VETORINO, arquivo);
-        //fputs(DIRAIZ, arquivo);
-        //fputs(VETORAIZ, arquivo);
-
-        // CRIA SISTEMA DE ARQUIVO      - init "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes" 
-        // init fs.bin 5 10 2
-        /*
-
-        */
 
 
         //fwrite(&meta, sizeof(struct metadata), 1, arquivo);
