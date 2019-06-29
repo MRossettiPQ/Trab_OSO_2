@@ -17,6 +17,9 @@
 #include "biblioteca.h"                                                         //Inclui algumas bibliotecas: unisted, openssl, sha256, inode.
 //Declaração função
 FILE*   criaSistemaArquivos     (char argc, char ** argv);
+FILE*   direSistemaArquivos     (char argc, char ** argv);
+FILE*   fileSistemaArquivos     (char argc, char ** argv);
+char    criaPath                ();
 void    verificaArquivo         (char argc, char ** argv);
 void    debugArquivo            (char argc, char ** argv);
 
@@ -39,21 +42,23 @@ int main(char argc, char ** argv)
     else if(0 == strcmp(argv[1], "add"))
     {
         // ADICIONA ARQUIVO             - add "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
-        /* code */
+        printf("\n Adiciona Arquivo ao Sistema de Arquivos");
+        arqDisco = criaSistemaArquivos(argc, argv);
+        printf("\n Arquivo Adicionado ao Sistema de Arquivos Criado\n");
     }
     else if(0 == strcmp(argv[1], "addDir"))
     {
         // ADICIONA DIRETORIO           - addDir "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
-        /* code */
+        printf("\n Adiciona Diretorio ao Sistema de Arquivos");
+        arqDisco = criaSistemaArquivos(argc, argv);
+        printf("\n Diretorio Adicionado ao Sistema de Arquivos Criado\n");
     }    
     else if(0 == strcmp(argv[1], "sha256"))
     {
         // IMPRIME A HASH               - sha256 "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
-        char pathSis[256];
-        getcwd(pathSis, sizeof(pathSis));
         printf("\n Imprime a HASH");
         verificaArquivo(argc, argv);                                        //Verifica se o .bin passado existe
-        auxSprintf = sprintf(cmdCC, "%s/%s", pathSis, argv[2]);             //Gera o path para o arquivo desejado
+        auxSprintf = sprintf(cmdCC, "%s/%s", criaPath(), argv[2]);          //Gera o path para o arquivo desejado
         printf("\n\nPath: %s\n\nHash: ", cmdCC);                            //Imprime o PATH do diretorio do programa
         printSha256(cmdCC);                                                 //Imprime a HASH
     }
@@ -69,13 +74,19 @@ int main(char argc, char ** argv)
 	return 0;	
 }
 //Implementa função
+char    criaPath            ()
+{
+    char pathSis[256];
+    getcwd(pathSis, sizeof(pathSis));
+    return pathSis;
+}
 void    debugArquivo        (char argc, char ** argv)                           //Função para impressão dos espaços de memoria, apenas para efeito comparativo
 {
     printf("\n O Arquivo contem \n\n");
     printf("OFFSET\t\t01  02  03  04  05  06  07  08  09  0A  0B  0C  0D  0E  0F\t\tTEXTO DECODIFICADO");
 
 
-}  
+}
 void    verificaArquivo     (char argc, char ** argv)                           //Função para detectar o arquivo .bin passado como argumento, e cria-lo caso não exista
 {
     char cmdCC[35], auxSprintf;
@@ -95,7 +106,28 @@ void    verificaArquivo     (char argc, char ** argv)                           
         printf("\n Arquivo gerado\n\n");
     }
 }
+FILE*   direSistemaArquivos (char argc, char ** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
+{
+    verificaArquivo(argc, argv);                                                //Chama a verificação do arquivo .bin
+    FILE *arquivo;
+    arquivo = fopen(argv[2],"rb+");
+    if (arquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
+    {
+        
+    }
+    return arquivo;
+}
+FILE*   fileSistemaArquivos (char argc, char ** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
+{
+    verificaArquivo(argc, argv);                                                //Chama a verificação do arquivo .bin
+    FILE *arquivo;
+    arquivo = fopen(argv[2],"rb+");
+    if (arquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
+    {
 
+    }
+    return arquivo;
+}
 FILE*   criaSistemaArquivos (char argc, char ** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
 {
     verificaArquivo(argc, argv);                                                //Chama a verificação do arquivo .bin
