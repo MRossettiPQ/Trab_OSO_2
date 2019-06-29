@@ -194,12 +194,25 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         // CRIA SISTEMA DE ARQUIVO      - init "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
         // init fs.bin 5 10 2
         INODE novoINODE;
-        int pos = 0, posD;
+        int pos = 0, posD, TamanhoBloco, NumeroBloco, NumeroInode;  
         char *conteudo = (char*)malloc(5*(sizeof(char)));                                                                          
         fseek(arquivo, pos, 0);
 
-        
+        TamanhoBloco = argv[3]                                                  //Tamanho dos blocos
+        NumeroBloco = argv[4]                                                   //Numero de blocos
+        NumeroInode = argv[5]                                                   //Numero de Inodes
 
+
+        fwrite(&TamanhoBloco, sizeof(int), 1, arquivo);
+        fwrite(&NumeroBloco, sizeof(int), 1, arquivo);
+        fwrite(&NumeroInode, sizeof(int), 1, arquivo);
+
+
+        novoINODE.SIZE = "1024";
+        novoINODE.IS_USED = "1";
+        novoINODE.IS_DIR = "0";
+
+        fwrite(&novoINODE, sizeof(INODE), 1, arquivo);
         //fwrite(&meta, sizeof(struct metadata), 1, arquivo);
     }
     else
