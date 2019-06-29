@@ -78,18 +78,20 @@ int main(char argc, char ** argv)
 //Implementa função
 void    debugArquivo        (char argc, char ** argv)                           //Função para impressão dos espaços de memoria, apenas para efeito comparativo
 {
+    printf("\nArquivo: %s", argv[2]);
     verificaArquivo(argc, argv);        
-    printf("\n O Arquivo contem \n\n");
+    printf("\n O Arquivo contem \n");
     printf("OFFSET\t\t01  02  03  04  05  06  07  08  09  0A  0B  0C  0D  0E  0F\t\tTEXTO DECODIFICADO");
     char valor;
     int offset = 0000000, cont = 0;
     FILE *arquivo; 
     arquivo = fopen(argv[2], "r");
     
+    printf("\n%i\t\t", offset);
     if (arquivo != NULL)                                                        //VERIFICA ARQUIVO .bin NO DIRETORIO
     { 
         printf("\n%i\t\t", offset);
-        while(fscanf(arquivo, "%s", &valor) != EOF)
+        while(fscanf(arquivo, "%s", valor) != EOF)
         {
             printf("%s  ");
             offset = offset + 00000001;
