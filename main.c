@@ -90,10 +90,11 @@ void    debugArquivo        (char argc, char ** argv)                           
     printf("\n%i\t\t", offset);
     if (arquivo != NULL)                                                        //VERIFICA ARQUIVO .bin NO DIRETORIO
     { 
+        /*
         printf("\n%i\t\t", offset);
         while(fscanf(arquivo, "%s", valor) != EOF)
         {
-            printf("%s  ");
+             printf("%s  ");
             offset = offset + 00000001;
             if(cont == 15)
             {
@@ -101,6 +102,7 @@ void    debugArquivo        (char argc, char ** argv)                           
                 printf("\n%i\t\t", offset);
             }
         }
+        */
     }
     fclose(arquivo);
 }
@@ -129,11 +131,9 @@ int     inodeLivre              (FILE* arquivo)
     }
 }
 void    verificaArquivo     (char argc, char ** argv)                           //Função para detectar o arquivo .bin passado como argumento, e cria-lo caso não exista
-{
-    char cmdCC[35], auxSprintf;
-    
+{    
     FILE *arquivo;  
-    arquivo = fopen(argv[2], "r");
+    arquivo = fopen(argv[2], "w+b");
     
     if (arquivo != NULL)                                                        //VERIFICA ARQUIVO .bin NO DIRETORIO
     { 
@@ -141,9 +141,7 @@ void    verificaArquivo     (char argc, char ** argv)                           
     }
     else
     {
-        printf("\n Arquivo inexistente");
-        auxSprintf = sprintf(cmdCC, "touch %s", argv[2]);                       //Gera o comando para criar o .bin
-        system(cmdCC);                                                          //Convoca o comando para o sistema
+        printf("\n Arquivo inexistente");                                                    //Convoca o comando para o sistema
         printf("\n Arquivo gerado\n\n");
     }
     fclose(arquivo);
@@ -188,27 +186,33 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
     verificaArquivo(argc, argv);                                                //Chama a verificação do arquivo .bin
     FILE *arquivo;                                                      
     
-    arquivo = fopen(argv[2],"rb+");
+    arquivo = fopen(argv[2],"r+b");
     if (arquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
     {
         // CRIA SISTEMA DE ARQUIVO      - init "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
         // init fs.bin 5 10 2
         INODE novoINODE;
-        int pos = 0, posD;
+        int pos = 0, posD, aux;
+
+        novoINODE.IS_USED = 0x01;
+        novoINODE.IS_DIR = 0x00;
+        strcpy(novoINODE.NAME, "Arquivo.txt");
+        novoINODE.SIZE = 0x01;
+        strcpy(novoINODE.DIRECT_BLOCKS, "BLO");
+        strcpy(novoINODE.DIRECT_BLOCKS, "IND");
+
         printf("\n Tamanho Bloco: %s \n Numero de Bloco: %s \n Numero Inode: %s", argv[3], argv[4], argv[5]);
-        printf("\n Size: %d \n IS_USED: %d \n IS_DIR: %d", novoINODE.SIZE, novoINODE.IS_USED, novoINODE.IS_DIR);
+        //printf("\n Size: %c \n IS_USED: %c \n IS_DIR: %c", novoDados.inodo.SIZE,  novoDados.inodo.IS_USED,  novoDados.inodo.IS_DIR);
         
-        strcpy(novoINODE.NAME, "MATHEUS");                                                           
         fseek(arquivo, pos, 0);
-        fwrite(&argv[3], sizeof(int), 1, arquivo);                              //Adiciona Tamanho dos blocos no Arquivo .Bin
-        fwrite(&argv[4], sizeof(int), 1, arquivo);                              //Adiciona Numero de blocos no Arquivo .Bin
-        fwrite(&argv[5], sizeof(int), 1, arquivo);                              //Adiciona Numero de Inodes no Arquivo .Bin
-        fwrite(&novoINODE, sizeof(INODE), 1, arquivo);                          //Adiciona Inode no Arquivo .Bin
+        fwrite(&argv[3], sizeof(char), 1, arquivo);                              //Adiciona Tamanho dos blocos no Arquivo .Bin
+        fwrite(&argv[4], sizeof(char), 1, arquivo);                              //Adiciona Numero de blocos no Arquivo .Bin
+        fwrite(&argv[5], sizeof(char), 1, arquivo);                              //Adiciona Numero de Inodes no Arquivo .Bin
+        fwrite(&novoINODE, sizeof(INODE), 1, arquivo);                           //Adiciona Inode no Arquivo .Bin
     }
     else
     {
         printf("\n Arquivo não foi encontrado \n");
     }
-
     return arquivo;
 }
