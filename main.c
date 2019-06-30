@@ -204,36 +204,40 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         // CRIA SISTEMA DE ARQUIVO      - init "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
         // init fs.bin 5 10 2
         INFOINODE novoINFO;
-        int pos = 0, posD, trocaBase, trocaBaseTB, trocaBaseNB, trocaBaseNI, contInode;
+        int pos = 0, posD, trocaBase, trocaBaseTB, trocaBaseNB, trocaBaseNI, contInode, contMapaBit, contBloco;
         float ceilMax = 0, auxCeil;
         char auxHex;
 
         //Transforma a char do argv em Hexadecimal
-        trocaBase = (int)strtol(argv[3], NULL, 10);                           //Troca base do Tamanho do Bloco
+        trocaBase = (int)strtol(argv[3], NULL, 10);                             //Troca base do Tamanho do Bloco
         novoINFO.tamBloco = trocaBase;
 
-        trocaBase = (int)strtol(argv[4], NULL, 10);                           //Troca base do Numero de Blocos
+        trocaBase = (int)strtol(argv[4], NULL, 10);                             //Troca base do Numero de Blocos
         novoINFO.numBloco = trocaBase;
 
-        trocaBase = (int)strtol(argv[5], NULL, 10);                           //Troca base do Numero de Inodes
+        trocaBase = (int)strtol(argv[5], NULL, 10);                             //Troca base do Numero de Inodes
         novoINFO.numInode = trocaBase;
 
         //Transforma a char do argv em inteiro
-        trocaBaseTB = (int)strtol(argv[3], NULL, 10);                         //Troca base do Tamanho do Bloco
-        trocaBaseNB = (int)strtol(argv[4], NULL, 10);                         //Troca base do Numero de Blocos
-        trocaBaseNI = (int)strtol(argv[5], NULL, 10);                         //Troca base do Numero de Inodes
+        trocaBaseTB = (int)strtol(argv[3], NULL, 10);                           //Troca base do Tamanho do Bloco
+        trocaBaseNB = (int)strtol(argv[4], NULL, 10);                           //Troca base do Numero de Blocos
+        trocaBaseNI = (int)strtol(argv[5], NULL, 10);                           //Troca base do Numero de Inodes
 
         ceilMax = retornaCeil((double)strtol(argv[4], NULL, 10));
         //printf("\n Tamanho do Bloco: %i\n Numero de Bloco: %i\n Numero de Inodes: %i\n Numero Ceil: %f", trocaBaseTB, trocaBaseNB, trocaBaseNI, ceilMax);
         
         printf("\n Primeiro Malloc: mapaBits");
-        novoINFO.mapaBits   = (char*)malloc(ceilMax);
+        novoINFO.mapaBits   = (char*)malloc(ceilMax);                           //Aloca o Mapa de Bits com N/8 posições
         printf("\n Segundo Malloc: vetorBloco");
-        novoINFO.vetorBloco = (char*)malloc(trocaBaseTB * trocaBaseNB);
+        novoINFO.vetorBloco = (char*)malloc(trocaBaseTB * trocaBaseNB);         //Aloca o Vetor de Blocos com T * N Posições
         printf("\n Terceiro Malloc: vetorInode");
-        //novoINFO.vetorInode = (INODE)malloc(trocaBaseNI * sizeoff(int));
+        //novoINFO.vetorInode = (INODE)malloc(trocaBaseNI * sizeoff(int));        //Aloca o Vetor de Inode com I posições
         //strcpy(novoINFO.dadoInode.NAME, "NaoUsado");
-        fseek(arquivo, pos, SEEK_SET);
+        fseek(arquivo, pos, SEEK_SET);                                          //Entra no arquivo na primeira posição
+        for(contMapaBit = 0; contMapaBit <= ceilMax; contMapaBit++)
+        {  
+            novoINFO.mapaBits[contMapaBit]    =   0x00;                         //Recebe o mapa de bits
+        }
         for(contInode = 0; contInode <= trocaBaseNI; contInode++)
         {   
             printf("\n Dentro do for para o Inode[%i]", contInode+1);
@@ -258,24 +262,19 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
                 unsigned char INDIRECT_BLOCKS[3];                                   // 
                 unsigned char DOUBLE_INDIRECT_BLOCKS[3];                            // 
             } INODE;
-            */
-
-            novoINFO.mapaBits[contInode]    =   0x00;
-            novoINFO.indDir                 =   0x01; 
-            novoINFO.vetorBloco[contInode]  =   0x00;
-
+            
             //novoINFO.vetorInode[contInode].IS_USED  =   0x00;
             //novoINFO.vetorInode[contInode].IS_DIR   =   0x00;
             //novoINFO.vetorInode[contInode].SIZE = (int)strlen(novoINFO.dadoInode.NAME);
             //novoINFO.vetorInode[contInode].NAME  =      "TESTE DO NOME";
-
-
-            fwrite(&novoINFO, sizeof(INFOINODE), 1, arquivo);                   //Adiciona Inode no Arquivo .Bin
-        
-            //fseek(arquivo, pos, posD);
-            //printf("\nPosicao: %i", posD);
+            */
         }
-        //posD = inodeLivre(arquivo);
+        for(contBloco = 0; contBloco <= (trocaBaseNI * trocaBaseTB); contBloco++)
+        {
+            novoINFO.vetorBloco[contBloco]  =   0x00;                               //Recebe o mapa de bits
+        }
+        novoINFO.indDir                 =   0x01;                                   //Posiciona o indice do diretorio raiz
+        fwrite(&novoINFO, sizeof(INFOINODE), 1, arquivo);                           //Adiciona Inode no Arquivo .Bin
     }
     else
     {
