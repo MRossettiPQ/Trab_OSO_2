@@ -241,7 +241,7 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
                 novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[2] = 0x67;
                 novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[3] = 0x67;
             */
-
+            //REPARA AQUI RIAN
             printf("\nNome: %s - Tamanho: %c", novoINFO.vetorInode[contInode].NAME, novoINFO.vetorInode[contInode].SIZE);
         }
         novoINFO.indDir                 =   0x26;                                       //Posiciona o indice do diretorio raiz
