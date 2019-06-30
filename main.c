@@ -7,6 +7,7 @@
     para addDir     - ./main addDir fs.bin
     para sha256     - ./main sha256 fs.bin
     para debug      - ./main debug fs.bin
+    Tabela ASCII: https://bluesock.org/~willg/dev/ascii.html
     Caso queira pegar as hash de varios arquivos para efeito de comparação: https://md5file.com/calculator
     fs.bin              zerada  - hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
     disco.bin           dados   - hash: 0f3c42a06b8055af98b733bfa1186e4245157c09a404a7151ec13469c83c3f3b
@@ -203,7 +204,7 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         // init fs.bin 5 10 2
         INFOINODE novoINFO;
         int pos = 0, posD, trocaBase, trocaBaseTB, trocaBaseNB, trocaBaseNI, contInode;
-        float ceilTeste = 0, auxCeil;
+        float ceilMax = 0, auxCeil;
         char auxHex;
 
         //Transforma a char do argv em Hexadecimal
@@ -221,13 +222,15 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         trocaBaseNB = (int)strtol(argv[4], NULL, 10);                         //Troca base do Numero de Blocos
         trocaBaseNI = (int)strtol(argv[5], NULL, 10);                         //Troca base do Numero de Inodes
 
-        ceilTeste = retornaCeil((double)strtol(argv[4], NULL, 10));
-        printf("\n Tamanho do Bloco: %i\n Numero de Bloco: %i\n Numero de Inodes: %i\n Numero Ceil: %f", trocaBaseTB, trocaBaseNB, trocaBaseNI, ceilTeste);
-        //novoINFO.mapaBits   = (int)malloc(sizeoff(int));
+        ceilMax = retornaCeil((double)strtol(argv[4], NULL, 10));
+        printf("\n Tamanho do Bloco: %i\n Numero de Bloco: %i\n Numero de Inodes: %i\n Numero Ceil: %f", trocaBaseTB, trocaBaseNB, trocaBaseNI, ceilMax);
+        
+        novoINFO.mapaBits   = (char*)malloc(ceilMax);
         //novoINFO.vetorInode = (char)malloc(sizeoff(INODE)*trocaBaseNI);
         fseek(arquivo, pos, SEEK_SET);
-        for(contInode = 0; contInode < contInode; contInode++)
+        for(contInode = 0; contInode <= trocaBaseNI; contInode++)
         {   
+            printf("\n Dentro do for");
             trocaBase = (int)strtol(argv[4], NULL, 10); 
 
             novoINFO.dadoInode.IS_USED  =   0x00;
@@ -255,7 +258,7 @@ double   retornaCeil             (double numInodes)
 {
     double divide = numInodes/8, result;
     result = ceil(divide);
-    printf("\nEntrada: %f\nDivide: %f\nCeil: %f", numInodes, divide, result);
+    //printf("\nEntrada: %f\nDivide: %f\nCeil: %f", numInodes, divide, result);         //Debug da função
 
     return result;
 }
