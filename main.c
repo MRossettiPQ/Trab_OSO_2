@@ -24,6 +24,13 @@ void    verificaArquivo         (char argc, char ** argv);
 void    debugArquivo            (char argc, char ** argv);
 int     inodeLivre              (FILE* arquivo);
 
+typedef struct 
+{
+    char    tamBloco[5];
+    char    numBloco[5];
+    char    numInode[5];
+    INODE   dadoInode;
+} INFOINODE;
 
 //Função principal
 int main(char argc, char ** argv)
@@ -192,23 +199,26 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         // CRIA SISTEMA DE ARQUIVO      - init "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
         // init fs.bin 5 10 2
         INODE novoINODE;
+        INFOINODE novoINFO;
         int pos = 0, posD, aux;
 
-        novoINODE.IS_USED = 0x01;
-        novoINODE.IS_DIR = 0x00;
-        strcpy(novoINODE.NAME, "Arquivo.txt");
-        novoINODE.SIZE = 0x01;
-        strcpy(novoINODE.DIRECT_BLOCKS, "BLO");
-        strcpy(novoINODE.DIRECT_BLOCKS, "IND");
+        strcpy(novoINFO.tamBloco, argv[3]);
+        strcpy(novoINFO.numBloco, argv[4]);
+        strcpy(novoINFO.numInode, argv[5]);
+        novoINFO.dadoInode.IS_USED  =   0x01;
+        novoINFO.dadoInode.IS_DIR   =   0x00;
+        strcpy(novoINFO.dadoInode.NAME, "Arquivo.txt");
+        novoINFO.dadoInode.SIZE = (int)strlen(novoINFO.dadoInode.NAME);
+        strcpy(novoINFO.dadoInode.DIRECT_BLOCKS, "BLO");
 
         printf("\n Tamanho Bloco: %s \n Numero de Bloco: %s \n Numero Inode: %s", argv[3], argv[4], argv[5]);
         //printf("\n Size: %c \n IS_USED: %c \n IS_DIR: %c", novoDados.inodo.SIZE,  novoDados.inodo.IS_USED,  novoDados.inodo.IS_DIR);
         
-        fseek(arquivo, pos, 0);
-        fwrite(&argv[3], sizeof(char), 1, arquivo);                              //Adiciona Tamanho dos blocos no Arquivo .Bin
-        fwrite(&argv[4], sizeof(char), 1, arquivo);                              //Adiciona Numero de blocos no Arquivo .Bin
-        fwrite(&argv[5], sizeof(char), 1, arquivo);                              //Adiciona Numero de Inodes no Arquivo .Bin
-        fwrite(&novoINODE, sizeof(INODE), 1, arquivo);                           //Adiciona Inode no Arquivo .Bin
+        fseek(arquivo, pos, SEEK_SET);
+        //fwrite(argv[3], sizeof(char), 1, arquivo);                              //Adiciona Tamanho dos blocos no Arquivo .Bin
+        //fwrite(argv[4], sizeof(char), 1, arquivo);                              //Adiciona Numero de blocos no Arquivo .Bin
+        //fwrite(argv[5], sizeof(char), 1, arquivo);                              //Adiciona Numero de Inodes no Arquivo .Bin
+        fwrite(&novoINFO, sizeof(INFOINODE), 1, arquivo);                          //Adiciona Inode no Arquivo .Bin
     }
     else
     {
