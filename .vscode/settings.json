@@ -5,7 +5,9 @@
         "biblioteca.h": "c",
         "ios": "c",
         "xstring": "c",
-        "type_traits": "c"
+        "type_traits": "c",
+        "math.h": "c",
+        "inode.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

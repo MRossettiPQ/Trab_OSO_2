@@ -17,25 +17,6 @@
 */
 //Importa arquivos pasta
 #include "biblioteca.h"                                                         //Inclui algumas bibliotecas: unisted, openssl, sha256, inode.
-//Declaração função
-FILE*   criaSistemaArquivos     (char argc, char ** argv);
-FILE*   direSistemaArquivos     (char argc, char ** argv);
-FILE*   fileSistemaArquivos     (char argc, char ** argv);
-void    verificaArquivo         (char argc, char ** argv);
-void    debugArquivo            (char argc, char ** argv);
-int     inodeLivre              (FILE* arquivo);
-double  retornaCeil             (double numInodes);
-
-typedef struct 
-{
-    unsigned char       tamBloco;
-    unsigned char       numBloco;
-    unsigned char       numInode;
-    char                *mapaBits;
-    INODE               *vetorInode;
-    char                indDir;
-    char                *vetorBloco;
-} INFOINODE;
 
 //Função principal
 int main(char argc, char ** argv)
@@ -102,19 +83,17 @@ void    debugArquivo        (char argc, char ** argv)                           
     printf("\n%i\t\t", offset);
     if (arquivo != NULL)                                                        //VERIFICA ARQUIVO .bin NO DIRETORIO
     { 
-        /*
         printf("\n%i\t\t", offset);
         while(fscanf(arquivo, "%s", valor) != EOF)
         {
-             printf("%s  ");
+             printf("%X  ");
             offset = offset + 00000001;
             if(cont == 15)
             {
                 printf("\n'TEXTO DECODIFICADO'");
-                printf("\n%i\t\t", offset);
+                printf("\n%c\t\t", offset);
             }
         }
-        */
     }
     fclose(arquivo);
 }
@@ -192,7 +171,6 @@ FILE*   fileSistemaArquivos (char argc, char ** argv)                           
 
     return arquivo;
 }
-
 FILE*   criaSistemaArquivos (char argc, char ** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
 {
     verificaArquivo(argc, argv);                                                //Chama a verificação do arquivo .bin
@@ -204,76 +182,65 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         // CRIA SISTEMA DE ARQUIVO      - init "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
         // init fs.bin 5 10 2
         INFOINODE novoINFO;
-        int pos = 0, posD, trocaBase, trocaBaseTB, trocaBaseNB, trocaBaseNI, contInode, contMapaBit, contBloco;
+        int pos = 0, posD, trocaBaseTB, trocaBaseNB, trocaBaseNI, trocaBase, contInode, contMapaBit, contBloco;
         float ceilMax = 0, auxCeil;
-        char auxHex;
+        char auxHex, auxSize;
 
+        fseek(arquivo, pos, SEEK_SET);                                          //Entra no arquivo na primeira posição
         //Transforma a char do argv em Hexadecimal
-        trocaBase = (int)strtol(argv[3], NULL, 10);                             //Troca base do Tamanho do Bloco
-        novoINFO.tamBloco = trocaBase;
-
-        trocaBase = (int)strtol(argv[4], NULL, 10);                             //Troca base do Numero de Blocos
-        novoINFO.numBloco = trocaBase;
-
-        trocaBase = (int)strtol(argv[5], NULL, 10);                             //Troca base do Numero de Inodes
-        novoINFO.numInode = trocaBase;
-
-        //Transforma a char do argv em inteiro
         trocaBaseTB = (int)strtol(argv[3], NULL, 10);                           //Troca base do Tamanho do Bloco
+        novoINFO.tamBloco = trocaBaseTB;
+
         trocaBaseNB = (int)strtol(argv[4], NULL, 10);                           //Troca base do Numero de Blocos
+        novoINFO.numBloco = trocaBaseNB;
+
         trocaBaseNI = (int)strtol(argv[5], NULL, 10);                           //Troca base do Numero de Inodes
+        novoINFO.numInode = trocaBaseNI;
 
         ceilMax = retornaCeil((double)strtol(argv[4], NULL, 10));
-        //printf("\n Tamanho do Bloco: %i\n Numero de Bloco: %i\n Numero de Inodes: %i\n Numero Ceil: %f", trocaBaseTB, trocaBaseNB, trocaBaseNI, ceilMax);
+        printf("\n Tamanho do Bloco: %i\n Numero de Bloco: %i\n Numero de Inodes: %i\n Numero Ceil: %f", trocaBaseTB, trocaBaseNB, trocaBaseNI, ceilMax);
         
-        printf("\n Primeiro Malloc: mapaBits");
-        novoINFO.mapaBits   = (char*)malloc(ceilMax);                           //Aloca o Mapa de Bits com N/8 posições
-        printf("\n Segundo Malloc: vetorBloco");
-        novoINFO.vetorBloco = (char*)malloc(trocaBaseTB * trocaBaseNB);         //Aloca o Vetor de Blocos com T * N Posições
-        printf("\n Terceiro Malloc: vetorInode");
-        novoINFO.vetorInode = malloc(trocaBaseNI);        //Aloca o Vetor de Inode com I posições
-        //strcpy(novoINFO.dadoInode.NAME, "NaoUsado");
-        fseek(arquivo, pos, SEEK_SET);                                          //Entra no arquivo na primeira posição
+        //printf("\n Primeiro Malloc: mapaBits");
+        //printf("\n Segundo Malloc: vetorBloco");
+        //printf("\n Terceiro Malloc: vetorInode");
+        //novoINFO.mapaBits   = malloc(2* (int)sizeof(char)/*(int)ceilMax * (int)sizeof(char)*/);                   //Aloca o Mapa de Bits com N/8 posições
+        trocaBase = trocaBaseTB * trocaBaseNB;
+        //novoINFO.vetorBloco = /*(char*)*/ malloc(trocaBase * sizeof(char));          //Aloca o Vetor de Blocos com T * N Posições
+        //novoINFO.vetorInode = /*(INODE*)*/malloc(trocaBaseNI * sizeof(INODE));      //Aloca o Vetor de Inode com I posições
+        
         for(contMapaBit = 0; contMapaBit < ceilMax; contMapaBit++)
         {  
-            novoINFO.mapaBits[contMapaBit]    =   0x03;                         //Recebe o mapa de bits
+            novoINFO.mapaBits[contMapaBit]    =   (char)strtol("10", NULL, 10); //Recebe o mapa de bits
+            printf("\nMapa de Bits: %X, %i", novoINFO.mapaBits[contMapaBit], novoINFO.mapaBits[contMapaBit]);
         }
         for(contInode = 0; contInode < trocaBaseNI; contInode++)
         {   
             printf("\n Dentro do for para o Inode[%i]", contInode+1);
-            /*
-            typedef struct 
-            {
-                unsigned char       tamBloco;
-                unsigned char       numBloco;
-                unsigned char       numInode;
-                char                *mapaBits;
-                INODE               *vetorInode;
-                char                indDir;
-                char                *vetorBloco;
-            } INFOINODE;
-            typedef struct 
-            {
-                unsigned char IS_USED;                                              // 0x01 se utilizado, 0x00 se livre
-                unsigned char IS_DIR;                                               // 0x01 se diretorio, 0x00 se arquivo
-                char NAME[10];                                                      // Nome do arquivo/dir
-                char SIZE;                                                          // Tamanho do arquivo/dir em bytes
-                unsigned char DIRECT_BLOCKS[3];                                     // 
-                unsigned char INDIRECT_BLOCKS[3];                                   // 
-                unsigned char DOUBLE_INDIRECT_BLOCKS[3];                            // 
-            } INODE;
-            */
-            novoINFO.vetorInode[contInode].IS_USED  =   0x04;
-            novoINFO.vetorInode[contInode].IS_DIR   =   0x05;
-            strcpy(novoINFO.vetorInode[contInode].NAME, "TESTE DO NOME");
-            novoINFO.vetorInode[contInode].SIZE = (int)strlen(novoINFO.vetorInode[contInode].NAME);
-            
+            novoINFO.vetorInode[contInode].IS_USED  =   0x01;
+            novoINFO.vetorInode[contInode].IS_DIR   =   0x01;
+
+            strcpy(novoINFO.vetorInode[contInode].NAME, "TESTE NOME");
+           
+            novoINFO.vetorInode[contInode].SIZE = 0x78;
+
+            novoINFO.vetorInode[contInode].DIRECT_BLOCKS[1] = 0x74;
+            novoINFO.vetorInode[contInode].DIRECT_BLOCKS[2] = 0x74;
+            novoINFO.vetorInode[contInode].DIRECT_BLOCKS[3] = 0x74;
+
+            novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[1] = 0x70;
+            novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[2] = 0x70;
+            novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[3] = 0x70;
+
+            novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[1] = 0x67;
+            novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[2] = 0x67;
+            novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[3] = 0x67;
+            printf("\nNome: %s, Tamanho Aux: %d, Tamanho: %d", novoINFO.vetorInode[contInode].NAME, auxSize, novoINFO.vetorInode[contInode].SIZE);
         }
+        novoINFO.indDir                 =   0x2b;                                   //Posiciona o indice do diretorio raiz
         for(contBloco = 0; contBloco < (trocaBaseNI * trocaBaseTB); contBloco++)
         {
-            novoINFO.vetorBloco[contBloco]  =  (int)strtol("3", NULL, 10);                               //Recebe o vetor de bloco
+            novoINFO.vetorBloco[contBloco]  =  0x26;//(int)strtol("3", NULL, 10);                               //Recebe o vetor de bloco
         }
-        novoINFO.indDir                 =   0x08;                                   //Posiciona o indice do diretorio raiz
         fwrite(&novoINFO, sizeof(INFOINODE), 1, arquivo);                           //Adiciona Inode no Arquivo .Bin
     }
     else
