@@ -225,7 +225,7 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
             strcpy(novoINFO.vetorInode[contInode].NAME, "TESTE NOME");
             fwrite(&novoINFO.vetorInode[contInode].NAME, 10, 1, arquivo);   
            
-            novoINFO.vetorInode[contInode].SIZE = 0x2f;
+            novoINFO.vetorInode[contInode].SIZE = 0x24;
             fwrite(&novoINFO.vetorInode[contInode].SIZE, sizeof(char), 1, arquivo);    
 
             /* 
@@ -244,7 +244,7 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
             //REPARA AQUI RIAN
             printf("\nNome: %s - Tamanho: %c", novoINFO.vetorInode[contInode].NAME, novoINFO.vetorInode[contInode].SIZE);
         }
-        novoINFO.indDir                 =   0x26;                                       //Posiciona o indice do diretorio raiz
+        novoINFO.indDir                 =   0x2f;                                       //Posiciona o indice do diretorio raiz
         fwrite(&novoINFO.indDir, sizeof(char), 1, arquivo);    
         
         novoINFO.vetorBloco = malloc(trocaBase * sizeof(char));                         //Aloca o Vetor de Blocos com T * N Posições
