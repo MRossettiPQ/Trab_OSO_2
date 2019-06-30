@@ -26,10 +26,10 @@ int     inodeLivre              (FILE* arquivo);
 
 typedef struct 
 {
-    unsigned char    tamBloco;
-    unsigned char    numBloco;
-    unsigned char    numInode;
-    INODE   dadoInode;
+    unsigned char       tamBloco;
+    unsigned char       numBloco;
+    unsigned char       numInode;
+    INODE               dadoInode;
 } INFOINODE;
 
 //Função principal
@@ -200,25 +200,16 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         // init fs.bin 5 10 2
         INODE novoINODE;
         INFOINODE novoINFO;
-        int pos = 0, posD, aux;
+        int pos = 0, posD, num;
         char auxHex;
 
-        int num = (int)strtol(argv[3], NULL, 16);       // number base 16
-        printf("%c\n", num);                            // print it as a char
-        printf("%d\n", num);                            // print it as decimal
-        printf("%X\n", num);                            // print it back as hex
+        num = (int)strtol(argv[3], NULL, 10);           // number base 16
         novoINFO.tamBloco = num;
 
-        num = (int)strtol(argv[4], NULL, 16);           // number base 16
-        printf("%c\n", num);                            // print it as a char
-        printf("%d\n", num);                            // print it as decimal
-        printf("%X\n", num);                            // print it back as hex
+        num = (int)strtol(argv[4], NULL, 10);           // number base 16
         novoINFO.numBloco = num;
 
-        num = (int)strtol(argv[5], NULL, 16);           // number base 16
-        printf("%c\n", num);                            // print it as a char
-        printf("%d\n", num);                            // print it as decimal
-        printf("%X\n", num);                            // print it back as hex
+        num = (int)strtol(argv[5], NULL, 10);           // number base 16
         novoINFO.numInode = num;
 
 
@@ -233,9 +224,6 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         //printf("\n Size: %c \n IS_USED: %c \n IS_DIR: %c", novoDados.inodo.SIZE,  novoDados.inodo.IS_USED,  novoDados.inodo.IS_DIR);
         
         fseek(arquivo, pos, SEEK_SET);
-        //fwrite(argv[3], sizeof(char), 1, arquivo);                              //Adiciona Tamanho dos blocos no Arquivo .Bin
-        //fwrite(argv[4], sizeof(char), 1, arquivo);                              //Adiciona Numero de blocos no Arquivo .Bin
-        //fwrite(argv[5], sizeof(char), 1, arquivo);                              //Adiciona Numero de Inodes no Arquivo .Bin
         fwrite(&novoINFO, sizeof(INFOINODE), 1, arquivo);                          //Adiciona Inode no Arquivo .Bin
     
         posD = inodeLivre(arquivo);
