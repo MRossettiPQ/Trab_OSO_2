@@ -231,14 +231,14 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         printf("\n Segundo Malloc: vetorBloco");
         novoINFO.vetorBloco = (char*)malloc(trocaBaseTB * trocaBaseNB);         //Aloca o Vetor de Blocos com T * N Posições
         printf("\n Terceiro Malloc: vetorInode");
-        //novoINFO.vetorInode = (INODE)malloc(trocaBaseNI * sizeoff(int));        //Aloca o Vetor de Inode com I posições
+        novoINFO.vetorInode = malloc(trocaBaseNI);        //Aloca o Vetor de Inode com I posições
         //strcpy(novoINFO.dadoInode.NAME, "NaoUsado");
         fseek(arquivo, pos, SEEK_SET);                                          //Entra no arquivo na primeira posição
-        for(contMapaBit = 0; contMapaBit <= ceilMax; contMapaBit++)
+        for(contMapaBit = 0; contMapaBit < ceilMax; contMapaBit++)
         {  
-            novoINFO.mapaBits[contMapaBit]    =   0x00;                         //Recebe o mapa de bits
+            novoINFO.mapaBits[contMapaBit]    =   0x03;                         //Recebe o mapa de bits
         }
-        for(contInode = 0; contInode <= trocaBaseNI; contInode++)
+        for(contInode = 0; contInode < trocaBaseNI; contInode++)
         {   
             printf("\n Dentro do for para o Inode[%i]", contInode+1);
             /*
@@ -262,18 +262,18 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
                 unsigned char INDIRECT_BLOCKS[3];                                   // 
                 unsigned char DOUBLE_INDIRECT_BLOCKS[3];                            // 
             } INODE;
-            
-            //novoINFO.vetorInode[contInode].IS_USED  =   0x00;
-            //novoINFO.vetorInode[contInode].IS_DIR   =   0x00;
-            //novoINFO.vetorInode[contInode].SIZE = (int)strlen(novoINFO.dadoInode.NAME);
-            //novoINFO.vetorInode[contInode].NAME  =      "TESTE DO NOME";
             */
+            novoINFO.vetorInode[contInode].IS_USED  =   0x04;
+            novoINFO.vetorInode[contInode].IS_DIR   =   0x05;
+            strcpy(novoINFO.vetorInode[contInode].NAME, "TESTE DO NOME");
+            novoINFO.vetorInode[contInode].SIZE = (int)strlen(novoINFO.vetorInode[contInode].NAME);
+            
         }
-        for(contBloco = 0; contBloco <= (trocaBaseNI * trocaBaseTB); contBloco++)
+        for(contBloco = 0; contBloco < (trocaBaseNI * trocaBaseTB); contBloco++)
         {
-            novoINFO.vetorBloco[contBloco]  =   0x00;                               //Recebe o mapa de bits
+            novoINFO.vetorBloco[contBloco]  =  (int)strtol("3", NULL, 10);                               //Recebe o vetor de bloco
         }
-        novoINFO.indDir                 =   0x01;                                   //Posiciona o indice do diretorio raiz
+        novoINFO.indDir                 =   0x08;                                   //Posiciona o indice do diretorio raiz
         fwrite(&novoINFO, sizeof(INFOINODE), 1, arquivo);                           //Adiciona Inode no Arquivo .Bin
     }
     else
