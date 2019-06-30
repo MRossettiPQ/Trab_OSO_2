@@ -26,9 +26,9 @@ int     inodeLivre              (FILE* arquivo);
 
 typedef struct 
 {
-    char    tamBloco[5];
-    char    numBloco[5];
-    char    numInode[5];
+    unsigned char    tamBloco;
+    unsigned char    numBloco;
+    unsigned char    numInode;
     INODE   dadoInode;
 } INFOINODE;
 
@@ -201,13 +201,31 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         INODE novoINODE;
         INFOINODE novoINFO;
         int pos = 0, posD, aux;
+        char auxHex;
 
-        strcpy(novoINFO.tamBloco, argv[3]);
-        strcpy(novoINFO.numBloco, argv[4]);
-        strcpy(novoINFO.numInode, argv[5]);
+        int num = (int)strtol(argv[3], NULL, 16);       // number base 16
+        printf("%c\n", num);                            // print it as a char
+        printf("%d\n", num);                            // print it as decimal
+        printf("%X\n", num);                            // print it back as hex
+        novoINFO.tamBloco = num;
+
+        num = (int)strtol(argv[4], NULL, 16);           // number base 16
+        printf("%c\n", num);                            // print it as a char
+        printf("%d\n", num);                            // print it as decimal
+        printf("%X\n", num);                            // print it back as hex
+        novoINFO.numBloco = num;
+
+        num = (int)strtol(argv[5], NULL, 16);           // number base 16
+        printf("%c\n", num);                            // print it as a char
+        printf("%d\n", num);                            // print it as decimal
+        printf("%X\n", num);                            // print it back as hex
+        novoINFO.numInode = num;
+
+
+
         novoINFO.dadoInode.IS_USED  =   0x01;
         novoINFO.dadoInode.IS_DIR   =   0x00;
-        strcpy(novoINFO.dadoInode.NAME, "Arquivo.txt");
+        strcpy(novoINFO.dadoInode.NAME, "Ar1.txt");
         novoINFO.dadoInode.SIZE = (int)strlen(novoINFO.dadoInode.NAME);
         strcpy(novoINFO.dadoInode.DIRECT_BLOCKS, "BLO");
 
@@ -219,6 +237,9 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         //fwrite(argv[4], sizeof(char), 1, arquivo);                              //Adiciona Numero de blocos no Arquivo .Bin
         //fwrite(argv[5], sizeof(char), 1, arquivo);                              //Adiciona Numero de Inodes no Arquivo .Bin
         fwrite(&novoINFO, sizeof(INFOINODE), 1, arquivo);                          //Adiciona Inode no Arquivo .Bin
+    
+        posD = inodeLivre(arquivo);
+        printf("\nPosicao: %i", posD);
     }
     else
     {
