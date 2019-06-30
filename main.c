@@ -32,8 +32,9 @@ typedef struct
     unsigned char       numBloco;
     unsigned char       numInode;
     char                *mapaBits;
-    char                *vetorInode;
-    INODE               dadoInode;
+    INODE               *vetorInode;
+    char                indDir;
+    char                *vetorBloco;
 } INFOINODE;
 
 //Função principal
@@ -223,29 +224,58 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         trocaBaseNI = (int)strtol(argv[5], NULL, 10);                         //Troca base do Numero de Inodes
 
         ceilMax = retornaCeil((double)strtol(argv[4], NULL, 10));
-        printf("\n Tamanho do Bloco: %i\n Numero de Bloco: %i\n Numero de Inodes: %i\n Numero Ceil: %f", trocaBaseTB, trocaBaseNB, trocaBaseNI, ceilMax);
+        //printf("\n Tamanho do Bloco: %i\n Numero de Bloco: %i\n Numero de Inodes: %i\n Numero Ceil: %f", trocaBaseTB, trocaBaseNB, trocaBaseNI, ceilMax);
         
+        printf("\n Primeiro Malloc: mapaBits");
         novoINFO.mapaBits   = (char*)malloc(ceilMax);
-        //novoINFO.vetorInode = (char)malloc(sizeoff(INODE)*trocaBaseNI);
+        printf("\n Segundo Malloc: vetorBloco");
+        novoINFO.vetorBloco = (char*)malloc(trocaBaseTB * trocaBaseNB);
+        printf("\n Terceiro Malloc: vetorInode");
+        //novoINFO.vetorInode = (INODE)malloc(trocaBaseNI * sizeoff(int));
+        //strcpy(novoINFO.dadoInode.NAME, "NaoUsado");
         fseek(arquivo, pos, SEEK_SET);
         for(contInode = 0; contInode <= trocaBaseNI; contInode++)
         {   
-            printf("\n Dentro do for");
-            trocaBase = (int)strtol(argv[4], NULL, 10); 
+            printf("\n Dentro do for para o Inode[%i]", contInode+1);
+            /*
+            typedef struct 
+            {
+                unsigned char       tamBloco;
+                unsigned char       numBloco;
+                unsigned char       numInode;
+                char                *mapaBits;
+                INODE               *vetorInode;
+                char                indDir;
+                char                *vetorBloco;
+            } INFOINODE;
+            typedef struct 
+            {
+                unsigned char IS_USED;                                              // 0x01 se utilizado, 0x00 se livre
+                unsigned char IS_DIR;                                               // 0x01 se diretorio, 0x00 se arquivo
+                char NAME[10];                                                      // Nome do arquivo/dir
+                char SIZE;                                                          // Tamanho do arquivo/dir em bytes
+                unsigned char DIRECT_BLOCKS[3];                                     // 
+                unsigned char INDIRECT_BLOCKS[3];                                   // 
+                unsigned char DOUBLE_INDIRECT_BLOCKS[3];                            // 
+            } INODE;
+            */
 
-            novoINFO.dadoInode.IS_USED  =   0x00;
-            novoINFO.dadoInode.IS_DIR   =   0x00;
-            strcpy(novoINFO.dadoInode.NAME, "NaoUsado");
-            novoINFO.dadoInode.SIZE = (int)strlen(novoINFO.dadoInode.NAME);
-            strcpy(novoINFO.dadoInode.DIRECT_BLOCKS, "BLO");
+            novoINFO.mapaBits[contInode]    =   0x00;
+            novoINFO.indDir                 =   0x01; 
+            novoINFO.vetorBloco[contInode]  =   0x00;
+
+            //novoINFO.vetorInode[contInode].IS_USED  =   0x00;
+            //novoINFO.vetorInode[contInode].IS_DIR   =   0x00;
+            //novoINFO.vetorInode[contInode].SIZE = (int)strlen(novoINFO.dadoInode.NAME);
+            //novoINFO.vetorInode[contInode].NAME  =      "TESTE DO NOME";
 
 
-            fwrite(&novoINFO, sizeof(INFOINODE), 1, arquivo);                          //Adiciona Inode no Arquivo .Bin
+            fwrite(&novoINFO, sizeof(INFOINODE), 1, arquivo);                   //Adiciona Inode no Arquivo .Bin
         
-            posD = inodeLivre(arquivo);
-            fseek(arquivo, pos, posD);
-            printf("\nPosicao: %i", posD);
+            //fseek(arquivo, pos, posD);
+            //printf("\nPosicao: %i", posD);
         }
+        //posD = inodeLivre(arquivo);
     }
     else
     {
