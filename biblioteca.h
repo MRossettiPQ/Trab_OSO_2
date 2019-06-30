@@ -33,10 +33,10 @@
         char                tamBloco;
         char                numBloco;
         char                numInode;
-        char                mapaBits[2];
-        INODE               vetorInode[2];
+        char                *mapaBits;
+        INODE               *vetorInode;
         char                indDir;
-        char                vetorBloco[10];
+        char                *vetorBloco;
     } INFOINODE;
 
     #define B_POR_INODE   	5

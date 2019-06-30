@@ -196,52 +196,63 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
 
         trocaBaseNI = (int)strtol(argv[5], NULL, 10);                           //Troca base do Numero de Inodes
         novoINFO.numInode = trocaBaseNI;
+        fwrite(&novoINFO.tamBloco, sizeof(char), 1, arquivo);   
+        fwrite(&novoINFO.numBloco, sizeof(char), 1, arquivo);   
+        fwrite(&novoINFO.numInode, sizeof(char), 1, arquivo);  
 
         ceilMax = retornaCeil((double)strtol(argv[4], NULL, 10));
-        printf("\n Tamanho do Bloco: %i\n Numero de Bloco: %i\n Numero de Inodes: %i\n Numero Ceil: %f", trocaBaseTB, trocaBaseNB, trocaBaseNI, ceilMax);
+        //printf("\n Tamanho do Bloco: %i\n Numero de Bloco: %i\n Numero de Inodes: %i\n Numero Ceil: %f", trocaBaseTB, trocaBaseNB, trocaBaseNI, ceilMax);
         
-        //printf("\n Primeiro Malloc: mapaBits");
-        //printf("\n Segundo Malloc: vetorBloco");
-        //printf("\n Terceiro Malloc: vetorInode");
-        //novoINFO.mapaBits   = malloc(2* (int)sizeof(char)/*(int)ceilMax * (int)sizeof(char)*/);                   //Aloca o Mapa de Bits com N/8 posições
-        trocaBase = trocaBaseTB * trocaBaseNB;
-        //novoINFO.vetorBloco = /*(char*)*/ malloc(trocaBase * sizeof(char));          //Aloca o Vetor de Blocos com T * N Posições
-        //novoINFO.vetorInode = /*(INODE*)*/malloc(trocaBaseNI * sizeof(INODE));      //Aloca o Vetor de Inode com I posições
-        
+        novoINFO.mapaBits   = malloc(ceilMax * sizeof(char));                   //Aloca o Mapa de Bits com N/8 posições
         for(contMapaBit = 0; contMapaBit < ceilMax; contMapaBit++)
         {  
             novoINFO.mapaBits[contMapaBit]    =   (char)strtol("10", NULL, 10); //Recebe o mapa de bits
-            printf("\nMapa de Bits: %X, %i", novoINFO.mapaBits[contMapaBit], novoINFO.mapaBits[contMapaBit]);
+            printf("\nMapa de Bits[%i]: %X, %i", contMapaBit, novoINFO.mapaBits[contMapaBit], novoINFO.mapaBits[contMapaBit]);
+            fwrite(&novoINFO.mapaBits[contMapaBit], sizeof(char), 1, arquivo);   
         }
+        trocaBase = trocaBaseTB * trocaBaseNB;
+        novoINFO.vetorInode = malloc(trocaBaseNI * sizeof(INODE));      //Aloca o Vetor de Inode com I posições
         for(contInode = 0; contInode < trocaBaseNI; contInode++)
         {   
             printf("\n Dentro do for para o Inode[%i]", contInode+1);
             novoINFO.vetorInode[contInode].IS_USED  =   0x01;
+            fwrite(&novoINFO.vetorInode[contInode].IS_USED, sizeof(char), 1, arquivo);  
+
             novoINFO.vetorInode[contInode].IS_DIR   =   0x01;
-
+            fwrite(&novoINFO.vetorInode[contInode].IS_DIR, sizeof(char), 1, arquivo);   
+            
+            
             strcpy(novoINFO.vetorInode[contInode].NAME, "TESTE NOME");
+            fwrite(&novoINFO.vetorInode[contInode].NAME, 10, 1, arquivo);   
            
-            novoINFO.vetorInode[contInode].SIZE = 0x78;
+            novoINFO.vetorInode[contInode].SIZE = 0x2f;
+            fwrite(&novoINFO.vetorInode[contInode].SIZE, sizeof(char), 1, arquivo);    
 
-            novoINFO.vetorInode[contInode].DIRECT_BLOCKS[1] = 0x74;
-            novoINFO.vetorInode[contInode].DIRECT_BLOCKS[2] = 0x74;
-            novoINFO.vetorInode[contInode].DIRECT_BLOCKS[3] = 0x74;
+            /* 
+                novoINFO.vetorInode[contInode].DIRECT_BLOCKS[1] = 0x74;
+                novoINFO.vetorInode[contInode].DIRECT_BLOCKS[2] = 0x74;
+                novoINFO.vetorInode[contInode].DIRECT_BLOCKS[3] = 0x74;
 
-            novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[1] = 0x70;
-            novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[2] = 0x70;
-            novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[3] = 0x70;
+                novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[1] = 0x70;
+                novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[2] = 0x70;
+                novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[3] = 0x70;
 
-            novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[1] = 0x67;
-            novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[2] = 0x67;
-            novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[3] = 0x67;
-            printf("\nNome: %s, Tamanho Aux: %d, Tamanho: %d", novoINFO.vetorInode[contInode].NAME, auxSize, novoINFO.vetorInode[contInode].SIZE);
+                novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[1] = 0x67;
+                novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[2] = 0x67;
+                novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[3] = 0x67;
+            */
+
+            printf("\nNome: %s - Tamanho: %c", novoINFO.vetorInode[contInode].NAME, novoINFO.vetorInode[contInode].SIZE);
         }
-        novoINFO.indDir                 =   0x2b;                                   //Posiciona o indice do diretorio raiz
+        novoINFO.indDir                 =   0x26;                                       //Posiciona o indice do diretorio raiz
+        fwrite(&novoINFO.indDir, sizeof(char), 1, arquivo);    
+        
+        novoINFO.vetorBloco = malloc(trocaBase * sizeof(char));                         //Aloca o Vetor de Blocos com T * N Posições
         for(contBloco = 0; contBloco < (trocaBaseNI * trocaBaseTB); contBloco++)
         {
-            novoINFO.vetorBloco[contBloco]  =  0x26;//(int)strtol("3", NULL, 10);                               //Recebe o vetor de bloco
+            novoINFO.vetorBloco[contBloco]  =  0x26;//(int)strtol("3", NULL, 10);       //Recebe o vetor de bloco
+            fwrite(&novoINFO.vetorBloco[contBloco], sizeof(char), 1, arquivo);
         }
-        fwrite(&novoINFO, sizeof(INFOINODE), 1, arquivo);                           //Adiciona Inode no Arquivo .Bin
     }
     else
     {
