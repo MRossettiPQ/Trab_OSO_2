@@ -1,6 +1,6 @@
 /*
     Para compilar no terminal use:
-    gcc main.c -o main -lssl -lcrypto 
+    gcc main.c -o main -lssl -lcrypto -lm
     para executar ./main
     para init       - ./main init fs.bin
     para add        - ./main add fs.bin
@@ -23,6 +23,7 @@ FILE*   fileSistemaArquivos     (char argc, char ** argv);
 void    verificaArquivo         (char argc, char ** argv);
 void    debugArquivo            (char argc, char ** argv);
 int     inodeLivre              (FILE* arquivo);
+double  retornaCeil             (double numInodes);
 
 typedef struct 
 {
@@ -201,7 +202,8 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         // CRIA SISTEMA DE ARQUIVO      - init "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
         // init fs.bin 5 10 2
         INFOINODE novoINFO;
-        int pos = 0, posD, trocaBase, trocaBaseTB, trocaBaseNB, trocaBaseNI, contInode, ceilTeste;
+        int pos = 0, posD, trocaBase, trocaBaseTB, trocaBaseNB, trocaBaseNI, contInode;
+        float ceilTeste = 0, auxCeil;
         char auxHex;
 
         //Transforma a char do argv em Hexadecimal
@@ -219,10 +221,8 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         trocaBaseNB = (int)strtol(argv[4], NULL, 10);                         //Troca base do Numero de Blocos
         trocaBaseNI = (int)strtol(argv[5], NULL, 10);                         //Troca base do Numero de Inodes
 
-        
-
-        ceilTeste = ceil(trocaBaseNB/8);
-        printf("\nTamanho do Bloco: %i\n Numero de Bloco: %i\n Numero de Inodes: %i\n Numero Ceil: %i", trocaBaseTB, trocaBaseNB, trocaBaseNI, ceilTeste);
+        ceilTeste = retornaCeil((double)strtol(argv[4], NULL, 10));
+        printf("\n Tamanho do Bloco: %i\n Numero de Bloco: %i\n Numero de Inodes: %i\n Numero Ceil: %f", trocaBaseTB, trocaBaseNB, trocaBaseNI, ceilTeste);
         //novoINFO.mapaBits   = (int)malloc(sizeoff(int));
         //novoINFO.vetorInode = (char)malloc(sizeoff(INODE)*trocaBaseNI);
         fseek(arquivo, pos, SEEK_SET);
@@ -249,4 +249,13 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         printf("\n Arquivo não foi encontrado \n");
     }
     return arquivo;
+}
+
+double   retornaCeil             (double numInodes)
+{
+    double divide = numInodes/8, result;
+    result = ceil(divide);
+    printf("\nEntrada: %f\nDivide: %f\nCeil: %f", numInodes, divide, result);
+
+    return result;
 }
