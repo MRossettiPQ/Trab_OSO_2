@@ -29,6 +29,8 @@ typedef struct
     unsigned char       tamBloco;
     unsigned char       numBloco;
     unsigned char       numInode;
+    char                *mapaBits;
+    char                *vetorInode;
     INODE               dadoInode;
 } INFOINODE;
 
@@ -198,36 +200,49 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
     {
         // CRIA SISTEMA DE ARQUIVO      - init "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
         // init fs.bin 5 10 2
-        INODE novoINODE;
         INFOINODE novoINFO;
-        int pos = 0, posD, num;
+        int pos = 0, posD, trocaBase, trocaBaseTB, trocaBaseNB, trocaBaseNI, contInode, ceilTeste;
         char auxHex;
 
-        num = (int)strtol(argv[3], NULL, 10);           // number base 16
-        novoINFO.tamBloco = num;
+        //Transforma a char do argv em Hexadecimal
+        trocaBase = (int)strtol(argv[3], NULL, 10);                           //Troca base do Tamanho do Bloco
+        novoINFO.tamBloco = trocaBase;
 
-        num = (int)strtol(argv[4], NULL, 10);           // number base 16
-        novoINFO.numBloco = num;
+        trocaBase = (int)strtol(argv[4], NULL, 10);                           //Troca base do Numero de Blocos
+        novoINFO.numBloco = trocaBase;
 
-        num = (int)strtol(argv[5], NULL, 10);           // number base 16
-        novoINFO.numInode = num;
+        trocaBase = (int)strtol(argv[5], NULL, 10);                           //Troca base do Numero de Inodes
+        novoINFO.numInode = trocaBase;
 
+        //Transforma a char do argv em inteiro
+        trocaBaseTB = (int)strtol(argv[3], NULL, 10);                         //Troca base do Tamanho do Bloco
+        trocaBaseNB = (int)strtol(argv[4], NULL, 10);                         //Troca base do Numero de Blocos
+        trocaBaseNI = (int)strtol(argv[5], NULL, 10);                         //Troca base do Numero de Inodes
 
-
-        novoINFO.dadoInode.IS_USED  =   0x01;
-        novoINFO.dadoInode.IS_DIR   =   0x00;
-        strcpy(novoINFO.dadoInode.NAME, "Ar1.txt");
-        novoINFO.dadoInode.SIZE = (int)strlen(novoINFO.dadoInode.NAME);
-        strcpy(novoINFO.dadoInode.DIRECT_BLOCKS, "BLO");
-
-        printf("\n Tamanho Bloco: %s \n Numero de Bloco: %s \n Numero Inode: %s", argv[3], argv[4], argv[5]);
-        //printf("\n Size: %c \n IS_USED: %c \n IS_DIR: %c", novoDados.inodo.SIZE,  novoDados.inodo.IS_USED,  novoDados.inodo.IS_DIR);
         
+
+        ceilTeste = ceil(trocaBaseNB/8);
+        printf("\nTamanho do Bloco: %i\n Numero de Bloco: %i\n Numero de Inodes: %i\n Numero Ceil: %i", trocaBaseTB, trocaBaseNB, trocaBaseNI, ceilTeste);
+        //novoINFO.mapaBits   = (int)malloc(sizeoff(int));
+        //novoINFO.vetorInode = (char)malloc(sizeoff(INODE)*trocaBaseNI);
         fseek(arquivo, pos, SEEK_SET);
-        fwrite(&novoINFO, sizeof(INFOINODE), 1, arquivo);                          //Adiciona Inode no Arquivo .Bin
-    
-        posD = inodeLivre(arquivo);
-        printf("\nPosicao: %i", posD);
+        for(contInode = 0; contInode < contInode; contInode++)
+        {   
+            trocaBase = (int)strtol(argv[4], NULL, 10); 
+
+            novoINFO.dadoInode.IS_USED  =   0x00;
+            novoINFO.dadoInode.IS_DIR   =   0x00;
+            strcpy(novoINFO.dadoInode.NAME, "NaoUsado");
+            novoINFO.dadoInode.SIZE = (int)strlen(novoINFO.dadoInode.NAME);
+            strcpy(novoINFO.dadoInode.DIRECT_BLOCKS, "BLO");
+
+
+            fwrite(&novoINFO, sizeof(INFOINODE), 1, arquivo);                          //Adiciona Inode no Arquivo .Bin
+        
+            posD = inodeLivre(arquivo);
+            fseek(arquivo, pos, posD);
+            printf("\nPosicao: %i", posD);
+        }
     }
     else
     {

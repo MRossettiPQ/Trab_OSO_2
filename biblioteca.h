@@ -7,6 +7,7 @@
     #include <stdio.h>
     #include <string.h>                                                 //strlen
     #include <stdlib.h>                                                 //strlen
+    #include  <math.h>
     //
     #include <sys/types.h>
     #include <sys/socket.h>
