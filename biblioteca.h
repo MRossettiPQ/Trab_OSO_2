@@ -39,12 +39,4 @@
         char                *vetorBloco;
     } INFOINODE;
 
-    #define B_POR_INODE   	5
-    #define N_INODE       	10
-    #define B_LIVRES   		N_INODE
-    #define B_DADOS     	N_INODE
-    #define ARQUIVO			0
-    #define DIRETORIO		1
-
-
 #endif /* biblioteca_h */
