@@ -76,7 +76,7 @@ int main                    (char argc, char ** argv)
 int     achaInodoLivre      (char argc, char ** argv)
 {
     char auxArgv1, auxArgv2, auxHEX[10], auxArgv3;
-	int idInode = 0, posArq = 1, contX;
+	int idInode = 0, posArq = 1, contX, auxCOMPARA;
     FILE *arquivo;
     arquivo = fopen(argv[2],"r+b");
     if (arquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
@@ -86,37 +86,32 @@ int     achaInodoLivre      (char argc, char ** argv)
         posArq = posArq + 1;
         fseek(arquivo, posArq, SEEK_SET);
         fread(&auxArgv2, sizeof(int), 1, arquivo); 
-        //printf("\n posArq1: %i - nposArq2: %i", auxArgv1, auxArgv2);
+        //printf("\n auxArgv1: %i - auxArgv2: %i", auxArgv1, auxArgv2);
 
         posArq = 3 + retornaCeil(auxArgv1); // + auxArgv2 * sizeof(INODE);
 
         fseek(arquivo, posArq, SEEK_SET);
         fread(&auxArgv3, sizeof(int), 1, arquivo); 
-        
-        sprintf(auxHEX, "%c", auxArgv3);
-        //printf("\n posArq3: %i \t- nposArq3: %i \t- auxHEX: %s", posArq, auxArgv3, auxHEX);
+    
+        //printf("\n posArq2: %i \t- auxArgv3: %i", posArq, auxArgv3);
         for(contX = 0; contX < auxArgv2; contX++)
         {
+            idInode++;
+            posArq = 2 + retornaCeil(auxArgv1) + (int)sizeof(INODE) * contX;
+            printf("\n posArq3: %i \t- auxArgv3: %i", posArq, auxArgv3);
             if (auxArgv3 == 0)
             {
-                //printf("\n auxArgv3: %i", auxArgv3);
-
-                sprintf(auxHEX, "%c", auxArgv3);
-                return (int)strtol(auxHEX, NULL, 10);                                             //Indice do diretorio raiz
+                printf("\n SAINDO: %d", idInode);
+                return idInode;                                             //Indice do diretorio raiz
             }
-            posArq = 3 + retornaCeil(auxArgv1) + sizeof(INODE) * contX;
+            printf("\n contX: %d", idInode);
+            
             fseek(arquivo, posArq, SEEK_SET);
             fread(&auxArgv3, sizeof(int), 1, arquivo);
-            //printf("\nposArq: %i - idInode: %i - auxHEX: %s\nNOMEDOCARELEO: %i\n", posArq, idInode, auxHEX, auxArgv3);
-            if (contX > auxArgv2)
-            {
-                printf("\n Sem espaço no INODO");
-                return 0;  
-            }
-            //sprintf(auxHEX, "%c", auxArgv3);
-            //printf("\n posArq3: %i \t- posArq3: %i \t- auxHEX: %s", posArq, auxArgv3, auxHEX);
         }
     }
+    printf("\n Sem espaço no INODO");
+    return 0;  
 }
 int     posDiretorioRaiz    (char argc, char ** argv)
 {	
@@ -124,7 +119,7 @@ int     posDiretorioRaiz    (char argc, char ** argv)
 	int idInode = 0, posArq = 1;
     FILE *arquivo;
     arquivo = fopen(argv[2],"r+b");
-    if (arquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
+    if (arquivo != NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
     {
         fseek(arquivo, posArq, SEEK_SET);
         fread(&auxArgv1, sizeof(int), 1, arquivo); 
@@ -139,6 +134,7 @@ int     posDiretorioRaiz    (char argc, char ** argv)
         sprintf (auxHEX, "%c", idInode);
 
         //printf("\nauxArgv1: %i - auxArgv2: %i - posArq: %i - idInode: %i - auxHEX: %s", auxArgv1, auxArgv2, posArq, idInode, auxHEX);
+        
         return (int)strtol(auxHEX, NULL, 10);                  
     }
 }
@@ -182,32 +178,35 @@ FILE*   direSistemaArquivos (char argc, char ** argv)                           
         {
             printf("\n Sem diretorio raiz");
             idInode = achaInodoLivre(argc, argv);
-            //printf("\n\tidInode: %i", idInode);
-            posArq = 2 + retornaCeil(auxArgv1) + idInode * sizeof(INODE) + 1;
-            //printf("\n\tposArq: %i", posArq);
-            fseek(arquivo, posArq, SEEK_SET);
-                sprintf (auxENT, "%c", 0x01);               //IS_USED
-            fwrite(&auxENT, sizeof(char), 1, arquivo); 
-                sprintf (auxENT, "%c", 0x01);               //IS_DIR
-            fwrite(&auxENT, sizeof(char), 1, arquivo); 
-                sprintf (auxENT, "%c", 0x2f);               //NOME DIRETORIO
-            fwrite(&auxENT, sizeof(char), 1, arquivo);
+            printf("\n\tidInode: %i", idInode);
+            if(idInode == 1000)
+            {
+                posArq = 2 + retornaCeil(auxArgv1) + idInode * sizeof(INODE) + 1;
+                //printf("\n\tposArq: %i", posArq);
+                fseek(arquivo, posArq, SEEK_SET);
+                    sprintf (auxENT, "%c", 0x01);               //IS_USED
+                fwrite(&auxENT, sizeof(char), 1, arquivo); 
+                    sprintf (auxENT, "%c", 0x01);               //IS_DIR
+                fwrite(&auxENT, sizeof(char), 1, arquivo); 
+                    sprintf (auxENT, "%c", 0x2f);               //NOME DIRETORIO
+                fwrite(&auxENT, sizeof(char), 1, arquivo);
 
-            posArq = 2 + retornaCeil(auxArgv1) + idInode * sizeof(INODE) + 13;
-            sizeNome = strlen(auxENT);                      //TAMANHO NOME
-            sprintf (auxENT, "%c", sizeNome);               //char TAMANHO NOME
-            fwrite(&auxENT, sizeof(char), 1, arquivo);      //TAMANHO NOME
+                posArq = 2 + retornaCeil(auxArgv1) + idInode * sizeof(INODE) + 13;
+                sizeNome = strlen(auxENT);                      //TAMANHO NOME
+                sprintf (auxENT, "%c", sizeNome);               //char TAMANHO NOME
+                fwrite(&auxENT, sizeof(char), 1, arquivo);      //TAMANHO NOME
 
-                sprintf (auxENT, "%c", 0x00);               
-            fwrite(&auxENT, sizeof(char), 1, arquivo);      //BLOCKDIRETO
-            fwrite(&auxENT, sizeof(char), 1, arquivo);
-            fwrite(&auxENT, sizeof(char), 1, arquivo);
-            fwrite(&auxENT, sizeof(char), 1, arquivo);      //BLOCKINDIRETO
-            fwrite(&auxENT, sizeof(char), 1, arquivo);
-            fwrite(&auxENT, sizeof(char), 1, arquivo);
-            fwrite(&auxENT, sizeof(char), 1, arquivo);      //BLOCKDUPLAMENTENDIRETO
-            fwrite(&auxENT, sizeof(char), 1, arquivo);
-            fwrite(&auxENT, sizeof(char), 1, arquivo);
+                    sprintf (auxENT, "%c", 0x00);               
+                fwrite(&auxENT, sizeof(char), 1, arquivo);      //BLOCKDIRETO
+                fwrite(&auxENT, sizeof(char), 1, arquivo);
+                fwrite(&auxENT, sizeof(char), 1, arquivo);
+                fwrite(&auxENT, sizeof(char), 1, arquivo);      //BLOCKINDIRETO
+                fwrite(&auxENT, sizeof(char), 1, arquivo);
+                fwrite(&auxENT, sizeof(char), 1, arquivo);
+                fwrite(&auxENT, sizeof(char), 1, arquivo);      //BLOCKDUPLAMENTENDIRETO
+                fwrite(&auxENT, sizeof(char), 1, arquivo);
+                fwrite(&auxENT, sizeof(char), 1, arquivo);
+            }
         }        
         else
         {
