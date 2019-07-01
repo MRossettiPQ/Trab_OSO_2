@@ -173,25 +173,29 @@ int     inodeLivre          (char argc, char ** argv)
         posArq++;
         fseek(arquivo, posArq, SEEK_SET);
         fread(&auxArgv3, sizeof(int), 1, arquivo); 
-        //posArq = posArq + 3;
-        //posArq = posArq + 1 + retornaCeil(auxArgv3);
-        printf("\n auxArgv1: %i\n auxArgv2: %i\n auxArgv3: %i\n Ceil: %i\n PosArq: %i", auxArgv1, auxArgv2, auxArgv3, (int)retornaCeil(auxArgv2), posArq);
-        posArq++;
-        fseek(arquivo, posArq, SEEK_SET);
-        for (contX = 0; contX < 5; contX++)
-        {   
-		    fread(&NOMEDOCARELEO, sizeof(int), 1, arquivo);
-            printf("\n NOMEDOCARELEO: %i", NOMEDOCARELEO);
-            posArq++;
-            fseek(arquivo, posArq, SEEK_SET);
-        }
-        
+        posArq = posArq + 2 + retornaCeil(auxArgv3);
         fseek(arquivo, posArq, SEEK_SET);
         fread(&NOMEDOCARELEO, sizeof(int), 1, arquivo);
-        printf("\n NOMEDOCARELEO: %i", NOMEDOCARELEO);
+        for(contX = 0; contX < auxArgv3; contX++)
+        {
+            if (NOMEDOCARELEO == 0x01)
+            {
+                printf("\n Posição usada");
+                fseek(arquivo, posArq, SEEK_SET);
+                fread(&idInode, sizeof(int), 1, arquivo);
+
+                return idInode;
+            }
+            else
+            {
+                fseek(arquivo, posArq, SEEK_SET);
+                fread(&NOMEDOCARELEO, sizeof(int), 1, arquivo);
+                posArq = posArq + 22;
+            }
+        }
     }
-    
-    return idInode;
+    printf("\n auxArgv1: %i\n auxArgv2: %i\n auxArgv3: %i\n Ceil: %i\n PosArq: %i", auxArgv1, auxArgv2, auxArgv3, (int)retornaCeil(auxArgv2), posArq);
+        
 }
 void    verificaArquivo     (char argc, char ** argv)                           //Função para detectar o arquivo .bin passado como argumento, e cria-lo caso não exista
 {    
@@ -339,7 +343,7 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
             
             printf("\nNome: %s - Tamanho: %c", novoINFO.vetorInode[contInode].NAME, novoINFO.vetorInode[contInode].SIZE);
         }
-        novoINFO.indDir                 =   0x00;                                       //Posiciona o indice do diretorio raiz
+        novoINFO.indDir                 =   0x7e;                                       //Posiciona o indice do diretorio raiz
         fwrite(&novoINFO.indDir, sizeof(char), 1, arquivo);  
         trocaBase = trocaBaseTB * trocaBaseNB;  
         novoINFO.vetorBloco = (char*)malloc(trocaBase * sizeof(char));                  //Aloca o Vetor de Blocos com T * N Posições
