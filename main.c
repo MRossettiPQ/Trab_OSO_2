@@ -160,7 +160,7 @@ void    verificaArquivo     (char argc, char ** argv)                           
         //printf("\n Arquivo gerado\n\n");
     }
 }
-int   direSistemaArquivos (char argc, char ** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
+int   direSistemaArquivos   (char argc, char ** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
 {
     // ADICIONA DIRETORIO           - addDir "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
     // ADICIONA DIRETORIO           - addDir fs.bin /etc
@@ -284,7 +284,7 @@ int   direSistemaArquivos (char argc, char ** argv)                           //
 
     return 0;
 }
-int   fileSistemaArquivos (char argc, char ** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
+int   fileSistemaArquivos   (char argc, char ** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
 {
     // ADICIONA ARQUIVO             - add "nome arquivo.bin" "Nome Arquivo para o Sistema" "Texto do arquivo"
     // ADICIONA ARQUIVO             - add fs.bin /teste.txt abcd
@@ -303,7 +303,7 @@ int   fileSistemaArquivos (char argc, char ** argv)                           //
 
     return 0;
 }
-int   criaSistemaArquivos (char argc, char ** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
+int   criaSistemaArquivos   (char argc, char ** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
 {
     int aux;
     verificaArquivo(argc, argv);                                                //Chama a verificação do arquivo .bin
@@ -414,7 +414,7 @@ int   criaSistemaArquivos (char argc, char ** argv)                           //
 
     return 0;
 }
-double   retornaCeil             (double numInodes)
+double   retornaCeil        (double numInodes)
 {
     double divide = numInodes/8, result;
     result = ceil(divide);
