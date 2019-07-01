@@ -67,53 +67,61 @@ int main(char argc, char ** argv)
 }
 int     achaInodoLivre       (char argc, char ** argv)
 {
-    char auxArgv1, auxArgv2, auxArgv3, auxHEX[10], NOMEDOCARELEO;
-	int idInode = 0, posArq = 2, contX, contY, trocaBase;
+    char auxArgv1, auxArgv2, auxHEX[10], auxArgv3;
+	int idInode = 0, posArq = 1, contX;
     FILE *arquivo;
-    INODE novoINODE;
-    //printf("\n NOME ARQUIVO: %s", argv[2]);
     arquivo = fopen(argv[2],"r+b");
     if (arquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
     {
         fseek(arquivo, posArq, SEEK_SET);
-        fread(&auxArgv3, sizeof(int), 1, arquivo); 
-        posArq = posArq + 2 + retornaCeil(auxArgv3);
-        fseek(arquivo, posArq, SEEK_SET);
-        fread(&NOMEDOCARELEO, sizeof(int), 1, arquivo);
-        printf("\n NOMEDOCARELEO: %i", NOMEDOCARELEO);
+        fread(&auxArgv1, sizeof(int), 1, arquivo); 
+        posArq = posArq + 1;
 
-        for(contX = 0; contX < auxArgv3; contX++)
+        fseek(arquivo, posArq, SEEK_SET);
+        fread(&auxArgv2, sizeof(int), 1, arquivo); 
+
+        posArq = posArq + 2 + retornaCeil(auxArgv1); // + auxArgv2 * sizeof(INODE);
+
+        printf("\nauxArgv1: %i - auxArgv: %i - posArq: %i - idInode: %i - auxHEX: %s", auxArgv1, auxArgv2, posArq, idInode, auxHEX);
+        fseek(arquivo, posArq, SEEK_SET);
+        fread(&auxArgv3, sizeof(int), 1, arquivo); 
+        sprintf(auxHEX, "%c", auxArgv3);
+        printf("\nNOMEDOCARELEO: %i - %s - %i\n", auxArgv3, auxHEX, (int)strtol(auxHEX, NULL, 10));
+        for(contX = 0; contX < auxArgv2; contX++)
         {
-            if (NOMEDOCARELEO == 0x34)
+            if (auxArgv3 == 0x34)
             {
-                printf("\n Posição Livre: %i", NOMEDOCARELEO);
+                printf("\n Posição Livre: %i", auxArgv3);
                 return posArq;                                             //Indice do diretorio raiz
             }
-            else
-            {
-                fseek(arquivo, posArq, SEEK_SET);
-                fread(&NOMEDOCARELEO, sizeof(int), 1, arquivo);
-                printf("\n Posição Usada: %i", NOMEDOCARELEO);
-                posArq = posArq + 22;
-            }
+            posArq = 3 + retornaCeil(auxArgv1) + auxArgv2 * contX;
+            fseek(arquivo, posArq, SEEK_SET);
+            fread(&auxArgv3, sizeof(int), 1, arquivo);
+            printf("\nposArq: %i - idInode: %i - auxHEX: %s\nNOMEDOCARELEO: %i\n", posArq, idInode, auxHEX, auxArgv3);
         }
     }
 }
 int     posDiretorioRaiz          (char argc, char ** argv)
 {	
-    char auxArgv, auxHEX[10];
-	int idInode = 0, posArq = 2;
+    char auxArgv1, auxArgv2, auxHEX[10];
+	int idInode = 0, posArq = 1;
     FILE *arquivo;
     arquivo = fopen(argv[2],"r+b");
     if (arquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
     {
         fseek(arquivo, posArq, SEEK_SET);
-        fread(&auxArgv, sizeof(int), 1, arquivo); 
-        posArq = posArq + 3 + retornaCeil(auxArgv) + auxArgv * 22;
+        fread(&auxArgv1, sizeof(int), 1, arquivo); 
+        posArq = posArq + 1;
+
+        fseek(arquivo, posArq, SEEK_SET);
+        fread(&auxArgv2, sizeof(int), 1, arquivo); 
+        posArq = posArq + 2 + retornaCeil(auxArgv1) + auxArgv2 * sizeof(INODE);
+
         fseek(arquivo, posArq, SEEK_SET);
         fread(&idInode, sizeof(int), 1, arquivo);
         sprintf (auxHEX, "%c", idInode);
-        //printf("\n auxArgv: %i - posArq: %i - idInode: %i - auxHEX: %s", auxArgv, posArq, idInode, auxHEX);
+
+        //printf("\nauxArgv1: %i - auxArgv: %i - posArq: %i - idInode: %i - auxHEX: %s", auxArgv1, auxArgv2, posArq, idInode, auxHEX);
         return (int)strtol(auxHEX, NULL, 10);                  
     }
 }
@@ -138,21 +146,25 @@ FILE*   direSistemaArquivos (char argc, char ** argv)                           
 {
     // ADICIONA DIRETORIO           - addDir "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
     // ADICIONA DIRETORIO           - addDir fs.bin /etc
+    int posArq, idInode;
+    char auxHEX[10], auxArgv;
     verificaArquivo(argc, argv);                                                //Chama a verificação do arquivo .bin
     FILE *arquivo;
     arquivo = fopen(argv[2],"rb+");
     if (arquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
     {
-        
-    }    
-    else
-    {
+        fseek(arquivo, posArq, SEEK_SET);
+        fread(&auxArgv, sizeof(int), 1, arquivo); 
+        posArq = posArq + 3 + retornaCeil(auxArgv) + auxArgv * 22;
+        fseek(arquivo, posArq, SEEK_SET);
+        fread(&idInode, sizeof(int), 1, arquivo);
+        sprintf (auxHEX, "%c", idInode);
+        //printf("\n auxArgv: %i - posArq: %i - idInode: %i - auxHEX: %s", auxArgv, posArq, idInode, auxHEX);
 
     }
 
     return arquivo;
 }
-
 FILE*   fileSistemaArquivos (char argc, char ** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
 {
     // ADICIONA ARQUIVO             - add "nome arquivo.bin" "Nome Arquivo para o Sistema" "Texto do arquivo"
@@ -206,7 +218,7 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         novoINFO.mapaBits   = (char*)malloc(ceilMax * sizeof(char));                    //Aloca o Mapa de Bits com N/8 posições
         for(contMapaBit = 0; contMapaBit < ceilMax; contMapaBit++)
         {  
-            novoINFO.mapaBits[contMapaBit]    =   (char)strtol("1", NULL, 10);          //Recebe o mapa de bits
+            novoINFO.mapaBits[contMapaBit]    =   (char)strtol("0", NULL, 10);          //Recebe o mapa de bits
             printf("\nMapa de Bits[%i]: %X, %i", contMapaBit, novoINFO.mapaBits[contMapaBit], novoINFO.mapaBits[contMapaBit]);
             fwrite(&novoINFO.mapaBits[contMapaBit], sizeof(char), 1, arquivo);   
         }
@@ -214,7 +226,7 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         for(contInode = 0; contInode < trocaBaseNI; contInode++)
         {   
             printf("\n Dentro do for para o Inode[%i]", contInode+1);
-            novoINFO.vetorInode[contInode].IS_USED  =   0x01;
+            novoINFO.vetorInode[contInode].IS_USED  =   0x00;
             fwrite(&novoINFO.vetorInode[contInode].IS_USED, sizeof(char), 1, arquivo);  
 
             novoINFO.vetorInode[contInode].IS_DIR   =   0x00;
@@ -279,7 +291,6 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
     }
     return arquivo;
 }
-
 double   retornaCeil             (double numInodes)
 {
     double divide = numInodes/8, result;
