@@ -157,8 +157,8 @@ void    debugArquivo        (char argc, char ** argv)                           
 }
 int     inodeLivre          (char argc, char ** argv)
 {	
-    char auxArgv1, auxArgv2, auxArgv3, auxHEX, auxArgv;
-	int idInode = 0, posArq = 0, contX;
+    char auxArgv1, auxArgv2, auxArgv3, auxHEX, NOMEDOCARELEO;
+	int idInode = 0, posArq = 0, contX, contY;
     FILE *arquivo;
     INODE novoINODE;
     //printf("\n NOME ARQUIVO: %s", argv[2]);
@@ -168,38 +168,27 @@ int     inodeLivre          (char argc, char ** argv)
         fseek(arquivo, posArq, SEEK_SET);
         fread(&auxArgv1, sizeof(int), 1, arquivo);
         posArq++;
-
         fseek(arquivo, posArq, SEEK_SET);
         fread(&auxArgv2, sizeof(int), 1, arquivo);
         posArq++;
-
         fseek(arquivo, posArq, SEEK_SET);
         fread(&auxArgv3, sizeof(int), 1, arquivo); 
-        //posArq = posArq + retornaCeil(auxArgv2) + 1;                            //Movimenta atraves do ceil + 1 para chegar no IS_USED
+        //posArq = posArq + 3;
+        //posArq = posArq + 1 + retornaCeil(auxArgv3);
+        printf("\n auxArgv1: %i\n auxArgv2: %i\n auxArgv3: %i\n Ceil: %i\n PosArq: %i", auxArgv1, auxArgv2, auxArgv3, (int)retornaCeil(auxArgv2), posArq);
+        posArq++;
+        fseek(arquivo, posArq, SEEK_SET);
+        for (contX = 0; contX < 5; contX++)
+        {   
+		    fread(&NOMEDOCARELEO, sizeof(int), 1, arquivo);
+            printf("\n NOMEDOCARELEO: %i", NOMEDOCARELEO);
+            posArq++;
+            fseek(arquivo, posArq, SEEK_SET);
+        }
         
-        posArq = posArq + 1;
-        while(posArq <= 10)
-        {
-            fseek(arquivo, posArq, SEEK_SET);
-            fread(&auxArgv, sizeof(int), 1, arquivo); 
-            printf("\n Value: %i", auxArgv);
-            posArq = posArq + 1;
-        }
-
-        //printf("\n auxArgv1: %i\n auxArgv2: %i\n auxArgv3: %i\n Ceil: %i\n PosArq: %i", auxArgv1, auxArgv2, auxArgv3, (int)retornaCeil(auxArgv2), posArq);
-        /*fseek(arquivo, posArq, SEEK_SET);
-        for (contX = 0; contX < auxArgv3; contX++)
-        {
-            fread(&auxArgv, sizeof(int), 1, arquivo);     
-            if(auxHEX == 0x01)
-            {
-                auxHEX = (char)strtol(auxArgv, NULL, 10);
-                printf("\n Posição X: %X", auxHEX);
-            }
-            posArq = posArq + 21 + 1; 
-            fseek(arquivo, posArq, SEEK_SET);
-        }
-        */
+        fseek(arquivo, posArq, SEEK_SET);
+        fread(&NOMEDOCARELEO, sizeof(int), 1, arquivo);
+        printf("\n NOMEDOCARELEO: %i", NOMEDOCARELEO);
     }
     
     return idInode;
