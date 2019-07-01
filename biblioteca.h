@@ -20,9 +20,9 @@
     #include "inode.h"                                                  // 
     #include "sha256.c"                                                 //
     //Declaração função
-    FILE*   criaSistemaArquivos     (char argc, char ** argv);
-    FILE*   direSistemaArquivos     (char argc, char ** argv);
-    FILE*   fileSistemaArquivos     (char argc, char ** argv);
+    int     criaSistemaArquivos     (char argc, char ** argv);
+    int     direSistemaArquivos     (char argc, char ** argv);
+    int     fileSistemaArquivos     (char argc, char ** argv);
     void    verificaArquivo         (char argc, char ** argv);
     int     posDiretorioRaiz        (char argc, char ** argv);
     int     achaInodoLivre          (char argc, char ** argv);
