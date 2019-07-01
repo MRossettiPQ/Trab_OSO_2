@@ -131,7 +131,7 @@ int     posDiretorioRaiz    (char argc, char ** argv)
         posArq = posArq + 1;
         fseek(arquivo, posArq, SEEK_SET);
         fread(&auxArgv2, sizeof(int), 1, arquivo); 
-        posArq = posArq + 1 + retornaCeil(auxArgv1) + auxArgv2 * sizeof(INODE);
+        posArq = posArq + retornaCeil(auxArgv1) + auxArgv2 * sizeof(INODE);
         //printf("\nposArq: %i - Ceil: %i", posArq, (int)retornaCeil(auxArgv1));
         fseek(arquivo, posArq, SEEK_SET);
         fread(&idInode, sizeof(int), 1, arquivo);
@@ -229,11 +229,12 @@ int   direSistemaArquivos (char argc, char ** argv)                           //
                 fwrite(&auxENT, sizeof(char), 1, arquivo);
 
                 
-                posArq = 3 + retornaCeil(auxArgv1) +  auxArgv2 * sizeof(INODE) + 1;
-                fseek(arquivo, posArq, SEEK_SET);
-                sprintf (auxENT, "%c", idInode);    
-                fwrite(&auxENT, sizeof(char), 1, arquivo);
+
             }
+            posArq = 2 + retornaCeil(auxArgv1) +  auxArgv2 * sizeof(INODE);
+            fseek(arquivo, posArq, SEEK_SET);
+            sprintf (auxENT, "%c", idInode);    
+            fwrite(&auxENT, sizeof(char), 1, arquivo);
         }        
         else
         {
