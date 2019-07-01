@@ -24,8 +24,8 @@
     FILE*   direSistemaArquivos     (char argc, char ** argv);
     FILE*   fileSistemaArquivos     (char argc, char ** argv);
     void    verificaArquivo         (char argc, char ** argv);
-    void    debugArquivo            (char argc, char ** argv);
-    int     inodeLivre              (char argc, char ** argv);
+    int     posDiretorioRaiz        (char argc, char ** argv);
+    int     achaInodoLivre          (char argc, char ** argv);
     double  retornaCeil             (double numInodes);
 
     typedef struct 
