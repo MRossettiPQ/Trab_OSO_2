@@ -241,7 +241,7 @@ int   direSistemaArquivos (char argc, char ** argv)                           //
             printf("\n ADICIONA DIRETORIO\n\tidInode: %i", idInode);
             if(idInode != 0)
             {
-                posArq = retornaCeil(auxArgv1) + sizeof(INODE) * (idInode - 1);
+                posArq = 2 + retornaCeil(auxArgv1) + sizeof(INODE) * (idInode - 1);
                 fseek(arquivo, posArq, SEEK_SET);
                     sprintf (auxENT, "%c", 0x01);               //IS_USED
                 fwrite(&auxENT, sizeof(char), 1, arquivo); 
