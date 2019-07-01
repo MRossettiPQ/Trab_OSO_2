@@ -38,7 +38,7 @@ int main(char argc, char ** argv)
         // ADICIONA ARQUIVO             - add "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
         printf("\n Adiciona Arquivo ao Sistema de Arquivos");
         //arqDisco = criaSistemaArquivos(argc, argv);
-        int D = posDiretorioRaiz(argc, argv), C = achaInodoLivre(argc, argv);
+        int D = posDiretorioRaiz(argc, argv),  C = achaInodoLivre(argc, argv);
         printf("\n Posição Diretorio Raiz: %i", D);
         printf("\n Posição Inode Livre: %i", C);
         printf("\n Arquivo Adicionado ao Sistema de Arquivos Criado\n");
@@ -76,11 +76,13 @@ int     achaInodoLivre       (char argc, char ** argv)
         fseek(arquivo, posArq, SEEK_SET);
         fread(&auxArgv1, sizeof(int), 1, arquivo); 
         posArq = posArq + 1;
-
+        printf("\nposArq: %i", posArq);
         fseek(arquivo, posArq, SEEK_SET);
         fread(&auxArgv2, sizeof(int), 1, arquivo); 
+        printf("\nposArq: %i", posArq);
 
         posArq = posArq + 2 + retornaCeil(auxArgv1); // + auxArgv2 * sizeof(INODE);
+        printf("\nposArq: %i", posArq);
 
         printf("\nauxArgv1: %i - auxArgv: %i - posArq: %i - idInode: %i - auxHEX: %s", auxArgv1, auxArgv2, posArq, idInode, auxHEX);
         fseek(arquivo, posArq, SEEK_SET);
@@ -112,16 +114,16 @@ int     posDiretorioRaiz          (char argc, char ** argv)
         fseek(arquivo, posArq, SEEK_SET);
         fread(&auxArgv1, sizeof(int), 1, arquivo); 
         posArq = posArq + 1;
-
         fseek(arquivo, posArq, SEEK_SET);
         fread(&auxArgv2, sizeof(int), 1, arquivo); 
-        posArq = posArq + 2 + retornaCeil(auxArgv1) + auxArgv2 * sizeof(INODE);
-
+        printf("\nposArq: %i - Ceil: %i", posArq, (int)retornaCeil(auxArgv1));
+        posArq = posArq + 1 + retornaCeil(auxArgv1) + auxArgv2 * sizeof(INODE);
+        printf("\nposArq: %i", posArq);
         fseek(arquivo, posArq, SEEK_SET);
         fread(&idInode, sizeof(int), 1, arquivo);
         sprintf (auxHEX, "%c", idInode);
 
-        //printf("\nauxArgv1: %i - auxArgv: %i - posArq: %i - idInode: %i - auxHEX: %s", auxArgv1, auxArgv2, posArq, idInode, auxHEX);
+        printf("\nauxArgv1: %i - auxArgv2: %i - posArq: %i - idInode: %i - auxHEX: %s", auxArgv1, auxArgv2, posArq, idInode, auxHEX);
         return (int)strtol(auxHEX, NULL, 10);                  
     }
 }
@@ -218,7 +220,7 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         novoINFO.mapaBits   = (char*)malloc(ceilMax * sizeof(char));                    //Aloca o Mapa de Bits com N/8 posições
         for(contMapaBit = 0; contMapaBit < ceilMax; contMapaBit++)
         {  
-            novoINFO.mapaBits[contMapaBit]    =   (char)strtol("0", NULL, 10);          //Recebe o mapa de bits
+            novoINFO.mapaBits[contMapaBit]    =   (char)strtol("1", NULL, 10);          //Recebe o mapa de bits
             printf("\nMapa de Bits[%i]: %X, %i", contMapaBit, novoINFO.mapaBits[contMapaBit], novoINFO.mapaBits[contMapaBit]);
             fwrite(&novoINFO.mapaBits[contMapaBit], sizeof(char), 1, arquivo);   
         }
@@ -226,7 +228,7 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         for(contInode = 0; contInode < trocaBaseNI; contInode++)
         {   
             printf("\n Dentro do for para o Inode[%i]", contInode+1);
-            novoINFO.vetorInode[contInode].IS_USED  =   0x00;
+            novoINFO.vetorInode[contInode].IS_USED  =   0x31;
             fwrite(&novoINFO.vetorInode[contInode].IS_USED, sizeof(char), 1, arquivo);  
 
             novoINFO.vetorInode[contInode].IS_DIR   =   0x00;
