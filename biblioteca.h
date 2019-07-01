@@ -25,7 +25,7 @@
     FILE*   fileSistemaArquivos     (char argc, char ** argv);
     void    verificaArquivo         (char argc, char ** argv);
     void    debugArquivo            (char argc, char ** argv);
-    int     inodeLivre              (FILE* arquivo);
+    int     inodeLivre              (char argc, char ** argv);
     double  retornaCeil             (double numInodes);
 
     typedef struct 

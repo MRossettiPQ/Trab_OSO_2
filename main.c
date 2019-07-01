@@ -37,7 +37,9 @@ int main(char argc, char ** argv)
     {
         // ADICIONA ARQUIVO             - add "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
         printf("\n Adiciona Arquivo ao Sistema de Arquivos");
-        arqDisco = criaSistemaArquivos(argc, argv);
+        //arqDisco = criaSistemaArquivos(argc, argv);
+        int D = inodeLivre(argc, argv);
+        printf("\n INODE LIVRE: %i", D);
         printf("\n Arquivo Adicionado ao Sistema de Arquivos Criado\n");
     }
     else if(0 == strcmp(argv[1], "addDir"))
@@ -69,8 +71,63 @@ int main(char argc, char ** argv)
 	return 0;	
 }
 //Implementa função
+void CriarDiretorioRaiz     (char argc, char ** argv)
+{
+    /*
+    int count = 0, var = -1;
+	char buffer[50];
+	INFOINODE novoINFO;
+    INODE novoINODE;
+    FILE *arquivo;  
+    arquivo = fopen(argv[2], "w+b");
+    
+    if (arquivo != NULL)                                                        //VERIFICA ARQUIVO .bin NO DIRETORIO
+    { 
+        printf("\n Arquivo no diretorio");
+
+
+    }
+    else
+    {
+        printf("\n Arquivo inexistente");                                                    //Convoca o comando para o sistema
+        printf("\n Arquivo gerado\n\n");
+    }
+    fclose(arquivo);
+
+	
+	int id_inode = InodeLivre(arquivo);
+	
+	memset(&buffer,0x00,sizeof(buffer));
+	memset(&inode.nome,0x00,sizeof(inode.nome));
+	
+	for(c=0;c<B_POR_INODE;c++)
+    {
+		memset(&inode.bloco[count],0x00,sizeof(inode.bloco[count]));
+	}
+	
+	//printf("%i\n",id_inode);
+	
+	printf("\nNOME DO DIRETORIO RAIZ: ");
+	scanf("%5s",&buffer);
+	
+	inode.id = id_inode;
+	inode.id_pai = id_inode;
+	inode.tipo = DIRETORIO;
+	strcpy(inode.nome,buffer);
+	inode.size = 0;
+	
+	
+	for (c=0;c<B_POR_INODE;c++){
+		inode.bloco[c] = -1;
+	}
+	
+	ProcuraInode(arquivo,id_inode);
+	fwrite(&novoINODE,sizeof(INODE),1,arquivo);
+    */
+}
 void    debugArquivo        (char argc, char ** argv)                           //Função para impressão dos espaços de memoria, apenas para efeito comparativo
 {
+    /*
     printf("\nArquivo: %s", argv[2]);
     verificaArquivo(argc, argv);        
     printf("\n O Arquivo contem \n");
@@ -96,30 +153,56 @@ void    debugArquivo        (char argc, char ** argv)                           
         }
     }
     fclose(arquivo);
+    */
 }
-int     inodeLivre              (FILE* arquivo)
-{
-	char aux = 0;
-	int contX = 0, idInode = 0;
-	fseek(arquivo, B_LIVRES, SEEK_SET);
-	
-	for (contX = 0; contX < N_INODE; contX++)
-	{
-		fread(&idInode, sizeof(int), 1, arquivo);
-		aux++;
-		
-		if (idInode == 0x00)
-		{
-			fseek(arquivo, -sizeof(int), SEEK_CUR);
-			fprintf(arquivo,"%c",aux);
-			return aux;
-		}
-		
-		if (contX < N_INODE-1)
+int     inodeLivre          (char argc, char ** argv)
+{	
+    char auxArgv1, auxArgv2, auxArgv3, auxHEX, auxArgv;
+	int idInode = 0, posArq = 0, contX;
+    FILE *arquivo;
+    INODE novoINODE;
+    //printf("\n NOME ARQUIVO: %s", argv[2]);
+    arquivo = fopen(argv[2],"r+b");
+    if (arquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
+    {
+        fseek(arquivo, posArq, SEEK_SET);
+        fread(&auxArgv1, sizeof(int), 1, arquivo);
+        posArq++;
+
+        fseek(arquivo, posArq, SEEK_SET);
+        fread(&auxArgv2, sizeof(int), 1, arquivo);
+        posArq++;
+
+        fseek(arquivo, posArq, SEEK_SET);
+        fread(&auxArgv3, sizeof(int), 1, arquivo); 
+        //posArq = posArq + retornaCeil(auxArgv2) + 1;                            //Movimenta atraves do ceil + 1 para chegar no IS_USED
+        
+        posArq = posArq + 1;
+        while(posArq <= 10)
         {
-			fseek(arquivo, sizeof(INODE)-sizeof(int), SEEK_CUR);
-	    }
+            fseek(arquivo, posArq, SEEK_SET);
+            fread(&auxArgv, sizeof(int), 1, arquivo); 
+            printf("\n Value: %i", auxArgv);
+            posArq = posArq + 1;
+        }
+
+        //printf("\n auxArgv1: %i\n auxArgv2: %i\n auxArgv3: %i\n Ceil: %i\n PosArq: %i", auxArgv1, auxArgv2, auxArgv3, (int)retornaCeil(auxArgv2), posArq);
+        /*fseek(arquivo, posArq, SEEK_SET);
+        for (contX = 0; contX < auxArgv3; contX++)
+        {
+            fread(&auxArgv, sizeof(int), 1, arquivo);     
+            if(auxHEX == 0x01)
+            {
+                auxHEX = (char)strtol(auxArgv, NULL, 10);
+                printf("\n Posição X: %X", auxHEX);
+            }
+            posArq = posArq + 21 + 1; 
+            fseek(arquivo, posArq, SEEK_SET);
+        }
+        */
     }
+    
+    return idInode;
 }
 void    verificaArquivo     (char argc, char ** argv)                           //Função para detectar o arquivo .bin passado como argumento, e cria-lo caso não exista
 {    
@@ -140,6 +223,8 @@ void    verificaArquivo     (char argc, char ** argv)                           
 
 FILE*   direSistemaArquivos (char argc, char ** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
 {
+    // ADICIONA DIRETORIO           - addDir "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
+    // ADICIONA DIRETORIO           - addDir fs.bin /etc
     verificaArquivo(argc, argv);                                                //Chama a verificação do arquivo .bin
     FILE *arquivo;
     arquivo = fopen(argv[2],"rb+");
@@ -157,12 +242,14 @@ FILE*   direSistemaArquivos (char argc, char ** argv)                           
 
 FILE*   fileSistemaArquivos (char argc, char ** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
 {
+    // ADICIONA ARQUIVO             - add "nome arquivo.bin" "Nome Arquivo para o Sistema" "Texto do arquivo"
+    // ADICIONA ARQUIVO             - add fs.bin /teste.txt abcd
     verificaArquivo(argc, argv);                                                //Chama a verificação do arquivo .bin
     FILE *arquivo;
     arquivo = fopen(argv[2],"rb+");
     if (arquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
     {
-
+        //strcpy(newNode.name,argv[4]);
     }
     else
     {
@@ -203,54 +290,73 @@ FILE*   criaSistemaArquivos (char argc, char ** argv)                           
         ceilMax = retornaCeil((double)strtol(argv[4], NULL, 10));
         //printf("\n Tamanho do Bloco: %i\n Numero de Bloco: %i\n Numero de Inodes: %i\n Numero Ceil: %f", trocaBaseTB, trocaBaseNB, trocaBaseNI, ceilMax);
         
-        novoINFO.mapaBits   = malloc(ceilMax * sizeof(char));                   //Aloca o Mapa de Bits com N/8 posições
+        novoINFO.mapaBits   = (char*)malloc(ceilMax * sizeof(char));                    //Aloca o Mapa de Bits com N/8 posições
         for(contMapaBit = 0; contMapaBit < ceilMax; contMapaBit++)
         {  
-            novoINFO.mapaBits[contMapaBit]    =   (char)strtol("10", NULL, 10); //Recebe o mapa de bits
+            novoINFO.mapaBits[contMapaBit]    =   (char)strtol("1", NULL, 10);          //Recebe o mapa de bits
             printf("\nMapa de Bits[%i]: %X, %i", contMapaBit, novoINFO.mapaBits[contMapaBit], novoINFO.mapaBits[contMapaBit]);
             fwrite(&novoINFO.mapaBits[contMapaBit], sizeof(char), 1, arquivo);   
         }
-        trocaBase = trocaBaseTB * trocaBaseNB;
-        novoINFO.vetorInode = malloc(trocaBaseNI * sizeof(INODE));      //Aloca o Vetor de Inode com I posições
+        novoINFO.vetorInode = (INODE*)malloc(trocaBaseNI * sizeof(INODE));              //Aloca o Vetor de Inode com I posições
         for(contInode = 0; contInode < trocaBaseNI; contInode++)
         {   
             printf("\n Dentro do for para o Inode[%i]", contInode+1);
             novoINFO.vetorInode[contInode].IS_USED  =   0x01;
             fwrite(&novoINFO.vetorInode[contInode].IS_USED, sizeof(char), 1, arquivo);  
 
-            novoINFO.vetorInode[contInode].IS_DIR   =   0x01;
+            novoINFO.vetorInode[contInode].IS_DIR   =   0x00;
             fwrite(&novoINFO.vetorInode[contInode].IS_DIR, sizeof(char), 1, arquivo);   
             
             
-            strcpy(novoINFO.vetorInode[contInode].NAME, "TESTE NOME");
+            //strcpy(novoINFO.vetorInode[contInode].NAME, "TESTE NOME");
+            
+            novoINFO.vetorInode[contInode].NAME[0] = 0x00;
+            novoINFO.vetorInode[contInode].NAME[1] = 0x00;
+            novoINFO.vetorInode[contInode].NAME[2] = 0x00;
+            novoINFO.vetorInode[contInode].NAME[3] = 0x00;
+            novoINFO.vetorInode[contInode].NAME[4] = 0x00;
+            novoINFO.vetorInode[contInode].NAME[5] = 0x00;
+            novoINFO.vetorInode[contInode].NAME[6] = 0x00;
+            novoINFO.vetorInode[contInode].NAME[7] = 0x00;
+            novoINFO.vetorInode[contInode].NAME[8] = 0x00;
+            novoINFO.vetorInode[contInode].NAME[9] = 0x00;
+            /* */
             fwrite(&novoINFO.vetorInode[contInode].NAME, 10, 1, arquivo);   
            
-            novoINFO.vetorInode[contInode].SIZE = 0x24;
+            novoINFO.vetorInode[contInode].SIZE = 0x00;
             fwrite(&novoINFO.vetorInode[contInode].SIZE, sizeof(char), 1, arquivo);    
 
-            /* 
-                novoINFO.vetorInode[contInode].DIRECT_BLOCKS[1] = 0x74;
-                novoINFO.vetorInode[contInode].DIRECT_BLOCKS[2] = 0x74;
-                novoINFO.vetorInode[contInode].DIRECT_BLOCKS[3] = 0x74;
+            novoINFO.vetorInode[contInode].DIRECT_BLOCKS[1] = 0x00;
+            novoINFO.vetorInode[contInode].DIRECT_BLOCKS[2] = 0x00;
+            novoINFO.vetorInode[contInode].DIRECT_BLOCKS[3] = 0x00;
+            fwrite(&novoINFO.vetorInode[contInode].DIRECT_BLOCKS[1], sizeof(char), 1, arquivo); 
+            fwrite(&novoINFO.vetorInode[contInode].DIRECT_BLOCKS[2], sizeof(char), 1, arquivo); 
+            fwrite(&novoINFO.vetorInode[contInode].DIRECT_BLOCKS[3], sizeof(char), 1, arquivo); 
 
-                novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[1] = 0x70;
-                novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[2] = 0x70;
-                novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[3] = 0x70;
+            novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[1] = 0x00;
+            novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[2] = 0x00;
+            novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[3] = 0x00;
+            fwrite(&novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[1], sizeof(char), 1, arquivo); 
+            fwrite(&novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[2], sizeof(char), 1, arquivo); 
+            fwrite(&novoINFO.vetorInode[contInode].INDIRECT_BLOCKS[3], sizeof(char), 1, arquivo); 
 
-                novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[1] = 0x67;
-                novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[2] = 0x67;
-                novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[3] = 0x67;
-            */
-            //REPARA AQUI RIAN
+
+            novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[1] = 0x00;
+            novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[2] = 0x00;
+            novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[3] = 0x00;
+            fwrite(&novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[1], sizeof(char), 1, arquivo); 
+            fwrite(&novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[2], sizeof(char), 1, arquivo); 
+            fwrite(&novoINFO.vetorInode[contInode].DOUBLE_INDIRECT_BLOCKS[3], sizeof(char), 1, arquivo); 
+            
             printf("\nNome: %s - Tamanho: %c", novoINFO.vetorInode[contInode].NAME, novoINFO.vetorInode[contInode].SIZE);
         }
-        novoINFO.indDir                 =   0x2f;                                       //Posiciona o indice do diretorio raiz
-        fwrite(&novoINFO.indDir, sizeof(char), 1, arquivo);    
-        
-        novoINFO.vetorBloco = malloc(trocaBase * sizeof(char));                         //Aloca o Vetor de Blocos com T * N Posições
+        novoINFO.indDir                 =   0x00;                                       //Posiciona o indice do diretorio raiz
+        fwrite(&novoINFO.indDir, sizeof(char), 1, arquivo);  
+        trocaBase = trocaBaseTB * trocaBaseNB;  
+        novoINFO.vetorBloco = (char*)malloc(trocaBase * sizeof(char));                  //Aloca o Vetor de Blocos com T * N Posições
         for(contBloco = 0; contBloco < (trocaBaseNI * trocaBaseTB); contBloco++)
         {
-            novoINFO.vetorBloco[contBloco]  =  0x26;//(int)strtol("3", NULL, 10);       //Recebe o vetor de bloco
+            novoINFO.vetorBloco[contBloco]  =  0x00;//(int)strtol("3", NULL, 10);       //Recebe o vetor de bloco
             fwrite(&novoINFO.vetorBloco[contBloco], sizeof(char), 1, arquivo);
         }
     }
