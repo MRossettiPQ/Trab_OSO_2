@@ -247,7 +247,6 @@ int   fileSistemaArquivos       (char** argv)                           //Cria o
 
     return 0;
 }
-
 int   direSistemaArquivos       (char** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
 {
     // ADICIONA DIRETORIO           - addDir "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
@@ -552,13 +551,14 @@ void    verificaArquivo         (char** argv)                           //Funç�
 }
 int     buscaBloco              (char** argv, int idPai, int idBloc)
 {
-    int idMapa, posArq = 0, troca;
-    char auxArgv1, auxArgv2, auxArgv3, auxTroca[10];
+    int posArq = 0, troca,troca2;
+    char idMapa,auxArgv1, auxArgv2, auxArgv3, auxTroca[10];
     FILE *arquivoBuscaBloco;
 
     arquivoBuscaBloco = fopen(argv[1],"r+b");
     if (arquivoBuscaBloco != NULL)                                                            //VERIFICA ARQUIVO .bin NO DIRETORIO
     {    
+        //printf("\n idPai: %i \t idBloc: %i ", idPai, idBloc);
         fseek(arquivoBuscaBloco, posArq++, SEEK_SET);
             fread(&auxArgv1, sizeof(char), 1, arquivoBuscaBloco); 
         fseek(arquivoBuscaBloco, posArq++, SEEK_SET);
@@ -567,18 +567,50 @@ int     buscaBloco              (char** argv, int idPai, int idBloc)
             fread(&auxArgv3, sizeof(char), 1, arquivoBuscaBloco);
 
         posArq = 16 + retornaCeil((int)auxArgv2) + idBloc + (idPai * (int)sizeof(INODE));
+        //printf("\n posArq: %i ", posArq);
+        //printf("\n retornaCeil: %i", (int)retornaCeil((int)auxArgv2));
         //printf("\n posArq: %i \t idMapa: %c \t idMapa: %c", posArq, idMapa, idMapa);
-
         fseek(arquivoBuscaBloco, posArq++, SEEK_SET);
-            fread(&idMapa, sizeof(char), 1, arquivoBuscaBloco);
-        troca = sprintf(auxTroca, "%i", idMapa);
-        troca = (int)strtol(auxTroca, NULL, 16);
-        //printf("\n posArq: %i \t idMapa: %c \t idMapa: %c \t decMapa: %i", posArq, idMapa, idMapa, troca);
+            fread(&idMapa, sizeof(int), 1, arquivoBuscaBloco);
+        sprintf (auxTroca, "%i", idMapa);
+        troca = (int)strtol(auxTroca, NULL, 16); 
+        //printf("\n posArq: %i ", posArq);
+        troca2 = (int)strtol(auxTroca, NULL, 10); 
+        //printf("\n troca: %i \t troca: %c \t troca: %c \t\n troca2: %c \t troca2: %i \t troca2: %i", troca, troca, troca, troca2, troca2, troca2);
+        //printf("\n posArq: %i \t idMapa: %c \t idMapa: %c \t decMapa: %i\t decMapa: %c", posArq, idMapa, idMapa, troca, troca);
     }
     fclose(arquivoBuscaBloco);
+    return troca2;
+}
+int     buscaMapa               (char** argv, int idPai, int idMapa)
+{
+    int posArq = 0, troca, troca2;
+    char dadoMapa,auxArgv1, auxArgv2, auxArgv3, auxTroca[10];
+    FILE *arquivoBuscaMapa;
+
+    arquivoBuscaMapa = fopen(argv[1],"r+b");
+    if (arquivoBuscaMapa != NULL)                                                            //VERIFICA ARQUIVO .bin NO DIRETORIO
+    {    
+        //printf("\n idPai: %i \t idBloc: %i ", idPai, idBloc);
+        fseek(arquivoBuscaMapa, posArq++, SEEK_SET);
+            fread(&auxArgv1, sizeof(char), 1, arquivoBuscaMapa); 
+        fseek(arquivoBuscaMapa, posArq++, SEEK_SET);
+            fread(&auxArgv2, sizeof(char), 1, arquivoBuscaMapa); 
+        fseek(arquivoBuscaMapa, posArq++, SEEK_SET);
+            fread(&auxArgv3, sizeof(char), 1, arquivoBuscaMapa);
+
+        posArq = 4 + retornaCeil((int)auxArgv2) + ((int)auxArgv3 * (int)sizeof(INODE)) + idMapa;
+
+        fseek(arquivoBuscaMapa, posArq++, SEEK_SET);
+            fread(&dadoMapa, sizeof(int), 1, arquivoBuscaMapa);
+        sprintf (auxTroca, "%i", dadoMapa);
+        troca = (int)strtol(auxTroca, NULL, 10); 
+        troca2 = (int)strtol(auxTroca, NULL, 16); 
+        //printf("\n troca: %i \t troca: %c \t troca: %c \t\n troca2: %c \t troca2: %i \t troca2: %i", troca, troca, troca, troca2, troca2, troca2);
+    }
+    fclose(arquivoBuscaMapa);
     return troca;
 }
-
 int     verDupDire              (char** argv)
 {
     int tamEntrada = strlen(argv[2]), tamanhoRaiz, idInode = 0, posArq = 0, contX = 1, contY, idPai = 0;
@@ -611,7 +643,6 @@ int     verDupDire              (char** argv)
             sprintf (auxRaiz, "%s%c", auxRaiz, argv[2][contX]);
             contX = contX + 1;
         }
-        //printf("\n RaizRaiz: %s \t- Raiz: %s", auxRaizRaiz, auxRaiz);
         if(strlen(auxRaiz) == 0)                                                        //RAIZRAIZ deve ser adicionado
         {
             strcpy(adicionar, auxRaizRaiz);
@@ -622,72 +653,43 @@ int     verDupDire              (char** argv)
             strcpy(adicionar, auxRaiz);
 
         }
-        //printf("\n adicionar: %s", adicionar);
-        //int idMapa; 
-        //idPai = 0;    
-    
-        //idMapa = buscaBloco(argv, idPai, 0);
-        //idMapa = buscaBloco(argv, idPai, 1);
-        //idMapa = buscaBloco(argv, idPai, 2);
 
         posArq = 0;
         posArq = 3 + retornaCeil(auxArgv2) + 4;
         contX = 0;
-        contY = 0;
-        printf("\n %i", (int)retornaCeil(auxArgv2) );
+        int idBloc = 0, idMapa = 0 , idPai = 0, idNode;
         char carac;
-        /* 
-        printf("\n posArq: %i", posArq);
-        fseek(verDup, posArq++, SEEK_SET); 
-        fread(&carac, sizeof(char), 1, verDup);
-        printf("\n carac: %c", carac);
-        sprintf(lido, "/%c", carac);
-        printf("\n %s == %s", adicionar, lido);
-        */
-
-        while(existe != 1)
+        int nauxArgv3 = auxArgv3;
+        while((existe != 1) && (contY < nauxArgv3))
         {
+            
+            //printf("\n PROXIMO INODE");
             contX = 0;
             sprintf(lido, "/");
             do
             {
                 fseek(verDup, posArq++, SEEK_SET); 
                 fread(&carac, sizeof(char), 1, verDup);
-                printf("\n carac: %c", carac);
+                //printf("\n carac: %c", carac);
                 sprintf(lido, "%s%c", lido, carac);
                 contX = contX + 1;
             }while ((contX < 10) && (carac != 0x00));
-            printf("\n %s == %s", adicionar, lido);
-            /* 
-            if(0 == strcmp(adicionar, "/"))
-            {
-                printf("\n É A BARRA");
-            }
-            */
-            if(contY == 3)
-            {
-                existe = 1;
-            }
-
             if(0 == strcmp(adicionar, lido))
             {
                 existe = 1;
                 printf("\n Pasta existe\t idPai: %i", idPai);
+                return existe;
             }
-            contY++;
+            contY = contY + 1;
             fseek(verDup, 0, SEEK_SET);
-            posArq = posArq + 10 + (10 - contX);
+            idMapa = buscaBloco(argv, idPai, idBloc);
+            idNode = buscaMapa(argv, idPai, idMapa);
+
+
+            posArq = posArq + 10 + (10 - contX) *(int)idNode;
         }
-  
+        printf("\n Não existe");
     }
     fclose(verDup);
-
     return existe;
-}
-int     buscaIdPai              (char** argv)
-{
-    int idPai;
-
-
-    return idPai;
 }

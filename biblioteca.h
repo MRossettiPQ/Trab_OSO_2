@@ -34,6 +34,7 @@
     int     buscaIdPai              (char** argv);
     int     verDupDire              (char** argv);
     int     buscaBloco              (char** argv, int idPai, int idBloc);
+    int     buscaMapa               (char** argv, int idPai, int idMapa);
 
     double  retornaCeil             (double numInodes);
 
