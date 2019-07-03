@@ -584,7 +584,7 @@ int     verDupDire              (char** argv)
     int tamEntrada = strlen(argv[2]), tamanhoRaiz, idInode = 0, posArq = 0, contX = 1, contY, idPai = 0;
     char auxRaiz[tamEntrada], auxRaizRaiz[tamEntrada], auxArquivo[tamEntrada], adicionar[tamEntrada], lido[10];
     char carac, auxArgv1, auxArgv2, auxArgv3, auxHEX[10], auxENT[10];
-    int existe;
+    int existe = 0;
     FILE *verDup;
     verDup = fopen(argv[1],"r+b");
     if (verDup!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
@@ -631,51 +631,54 @@ int     verDupDire              (char** argv)
         //idMapa = buscaBloco(argv, idPai, 2);
 
         posArq = 0;
-        posArq = 3 + retornaCeil(auxArgv2) + 2;
-        for(contY = 0; contY < (int)conAgv3; contY++)
-        {
-            //printf("\n Proximo INODE");
-            contX = 0;
-            fseek(verDup, posArq++, SEEK_SET);
-            fread(&carac, sizeof(char), 1, verDup);
+        posArq = 3 + retornaCeil(auxArgv2) + 4;
+        contX = 0;
+        contY = 0;
+        printf("\n %i", (int)retornaCeil(auxArgv2) );
+        char carac;
+        /* 
+        printf("\n posArq: %i", posArq);
+        fseek(verDup, posArq++, SEEK_SET); 
+        fread(&carac, sizeof(char), 1, verDup);
+        printf("\n carac: %c", carac);
+        sprintf(lido, "/%c", carac);
+        printf("\n %s == %s", adicionar, lido);
+        */
 
-            if(carac != 0x2f)
-            {
-                sprintf(lido,"/%c", carac);
-            }
-            else
-            {
-                sprintf(lido,"%c", carac);
-            }
+        while(existe != 1)
+        {
+            contX = 0;
+            sprintf(lido, "/");
             do
             {
-                //printf("\n Pos: %i", posArq);
-                fseek(verDup, posArq++, SEEK_SET);
-                    fread(&carac, sizeof(char), 1, verDup);
-                    sprintf(lido,"%s%c", lido, carac);
-                    printf("%c", carac);
-                contX++;
-            }while((contX < 10) && (carac != 0x00) && (carac != 0x2f));
-            //printf("\nFrase Completa: %s", lido);
-            
-            //printf("\n Pos: %i", posArq);
+                fseek(verDup, posArq++, SEEK_SET); 
+                fread(&carac, sizeof(char), 1, verDup);
+                printf("\n carac: %c", carac);
+                sprintf(lido, "%s%c", lido, carac);
+                contX = contX + 1;
+            }while ((contX < 10) && (carac != 0x00));
+            printf("\n %s == %s", adicionar, lido);
+            /* 
+            if(0 == strcmp(adicionar, "/"))
+            {
+                printf("\n É A BARRA");
+            }
+            */
+            if(contY == 3)
+            {
+                existe = 1;
+            }
+
             if(0 == strcmp(adicionar, lido))
             {
-                idPai = contY;
+                existe = 1;
                 printf("\n Pasta existe\t idPai: %i", idPai);
             }
-            posArq = 0;
-                fseek(verDup, posArq++, SEEK_SET);
-            //printf("\n contY: %i \tcontX: %i \tPos: %i", contY, contX, posArq);
-            printf("\n %s == %s", adicionar, lido);
-            //printf("\n Pos: %i", posArq);
-            //int idMapa;
-            //idMapa = buscaBloco(argv, idPai-1, 0);
-
-            posArq = 3 + retornaCeil(auxArgv2) + 2 + (int)sizeof(INODE) * contY;
+            contY++;
+            fseek(verDup, 0, SEEK_SET);
+            posArq = posArq + 10 + (10 - contX);
         }
-    
-    
+  
     }
     fclose(verDup);
 
