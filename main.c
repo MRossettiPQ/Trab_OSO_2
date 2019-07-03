@@ -92,9 +92,7 @@ int main                    ()
     {
         // ADICIONA DIRETORIO           - addDir "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
         printf("\n Adiciona Diretorio ao Sistema de Arquivos");
-        aux = direSistemaArquivos(argv);
-        
-        //int idDirRaiz = posDiretorioRaiz(argv);    
+        aux = direSistemaArquivos(argv); 
         printf("\n Diretorio Adicionado ao Sistema de Arquivos Criado\n");
         getcwd(pathSis, sizeof(pathSis));                                   //Busca o PATH do diretorio do programa
         auxSprintf = sprintf(cmdCC, "%s/%s", pathSis, argv[2]);             //Gera o PATH para o arquivo desejado
@@ -257,16 +255,19 @@ int   direSistemaArquivos       (char** argv)                           //Cria o
     int posArq = 0, idInode, idDirRaiz, sizeNome, contX, aux;
     char auxHEX[10], auxArgv1, auxArgv2, auxENT[10];
     verificaArquivo(argv);                                                          //Chama a verificação do arquivo .bin
+    
     FILE *direArquivo;
     direArquivo = fopen(argv[1],"r+b");
-    if (direArquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
-    {
+    if (direArquivo != NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
+    {    
         fseek(direArquivo, posArq++, SEEK_SET);
         fseek(direArquivo, posArq++, SEEK_SET);         
             fread(&auxArgv1, sizeof(int), 1, direArquivo);                          //Numero de Blocos
         fseek(direArquivo, posArq++, SEEK_SET); 
             fread(&auxArgv2, sizeof(int), 1, direArquivo);                          //Numero de Inodes
         //printf("\n auxArgv1: %i \t auxArgv2: %i", auxArgv1, auxArgv2);
+
+
         if(0 == verDupDire(argv))
         {
             idDirRaiz = posDiretorioRaiz(argv);                                         //
@@ -330,7 +331,7 @@ int   direSistemaArquivos       (char** argv)                           //Cria o
             }
         } 
     }
-    fclose(direArquivo);
+    //fclose(direArquivo);
 
     return 0;
 }
@@ -510,7 +511,7 @@ int     addPastaRaiz            (char** argv)                           //Adicio
 int     posDiretorioRaiz        (char** argv)                           //Função que retorna Diretorio Raiz
 {	
     char auxArgv1, auxArgv2, auxHEX[10];
-	int idInode = 0, posArq = 1;
+	int idInode = 0, posArq = 1, auxId;
     FILE *arquivo;
     arquivo = fopen(argv[1],"r+b");
     if (arquivo != NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
@@ -523,13 +524,13 @@ int     posDiretorioRaiz        (char** argv)                           //Funç�
         printf("\nposArq: %i - Ceil: %i", posArq, (int)retornaCeil(auxArgv1));
         fseek(arquivo, posArq++, SEEK_SET);
             fread(&idInode, sizeof(int), 1, arquivo);
-        //sprintf (auxHEX, "%c", idInode);
-        //idInode = (int)strtol(auxHEX, NULL, 10); 
+        sprintf (auxHEX, "%c", idInode);
+        auxId = (int)strtol(auxHEX, NULL, 16); 
 
         //printf("\nauxArgv1: %i - auxArgv2: %i - posArq: %i - idInode: %i - auxHEX: %s", auxArgv1, auxArgv2, posArq, idInode, auxHEX);
         
         //return (int)strtol(auxHEX, NULL, 10); 
-        return idInode;                 
+        return auxId;                 
     }
 }
 void    verificaArquivo         (char** argv)                           //Função para detectar o arquivo .bin passado como argumento, e cria-lo caso não exista
@@ -549,13 +550,33 @@ void    verificaArquivo         (char** argv)                           //Funç�
         //printf("\n Arquivo gerado\n\n");
     }
 }
-
-int     buscaIdPai              (char** argv)
+int     buscaBloco              (char** argv, int idPai, int idBloc)
 {
-    int idPai;
+    int idMapa, posArq = 0, troca;
+    char auxArgv1, auxArgv2, auxArgv3, auxTroca[10];
+    FILE *arquivoBuscaBloco;
 
+    arquivoBuscaBloco = fopen(argv[1],"r+b");
+    if (arquivoBuscaBloco != NULL)                                                            //VERIFICA ARQUIVO .bin NO DIRETORIO
+    {    
+        fseek(arquivoBuscaBloco, posArq++, SEEK_SET);
+            fread(&auxArgv1, sizeof(char), 1, arquivoBuscaBloco); 
+        fseek(arquivoBuscaBloco, posArq++, SEEK_SET);
+            fread(&auxArgv2, sizeof(char), 1, arquivoBuscaBloco); 
+        fseek(arquivoBuscaBloco, posArq++, SEEK_SET);
+            fread(&auxArgv3, sizeof(char), 1, arquivoBuscaBloco);
 
-    return idPai;
+        posArq = 16 + retornaCeil((int)auxArgv2) + idBloc + (idPai * (int)sizeof(INODE));
+        //printf("\n posArq: %i \t idMapa: %c \t idMapa: %c", posArq, idMapa, idMapa);
+
+        fseek(arquivoBuscaBloco, posArq++, SEEK_SET);
+            fread(&idMapa, sizeof(char), 1, arquivoBuscaBloco);
+        troca = sprintf(auxTroca, "%i", idMapa);
+        troca = (int)strtol(auxTroca, NULL, 16);
+        //printf("\n posArq: %i \t idMapa: %c \t idMapa: %c \t decMapa: %i", posArq, idMapa, idMapa, troca);
+    }
+    fclose(arquivoBuscaBloco);
+    return troca;
 }
 
 int     verDupDire              (char** argv)
@@ -602,22 +623,39 @@ int     verDupDire              (char** argv)
 
         }
         //printf("\n adicionar: %s", adicionar);
+        //int idMapa; 
+        //idPai = 0;    
+    
+        //idMapa = buscaBloco(argv, idPai, 0);
+        //idMapa = buscaBloco(argv, idPai, 1);
+        //idMapa = buscaBloco(argv, idPai, 2);
+
+        posArq = 0;
         posArq = 3 + retornaCeil(auxArgv2) + 2;
         for(contY = 0; contY < (int)conAgv3; contY++)
         {
             //printf("\n Proximo INODE");
             contX = 0;
             fseek(verDup, posArq++, SEEK_SET);
-                fread(&carac, sizeof(int), 1, verDup);
+            fread(&carac, sizeof(char), 1, verDup);
+
+            if(carac != 0x2f)
+            {
                 sprintf(lido,"/%c", carac);
+            }
+            else
+            {
+                sprintf(lido,"%c", carac);
+            }
             do
             {
                 //printf("\n Pos: %i", posArq);
                 fseek(verDup, posArq++, SEEK_SET);
-                    fread(&carac, sizeof(int), 1, verDup);
+                    fread(&carac, sizeof(char), 1, verDup);
                     sprintf(lido,"%s%c", lido, carac);
+                    printf("%c", carac);
                 contX++;
-            }while((contX < 10) && (carac != 0x00));
+            }while((contX < 10) && (carac != 0x00) && (carac != 0x2f));
             //printf("\nFrase Completa: %s", lido);
             
             //printf("\n Pos: %i", posArq);
@@ -629,10 +667,10 @@ int     verDupDire              (char** argv)
             posArq = 0;
                 fseek(verDup, posArq++, SEEK_SET);
             //printf("\n contY: %i \tcontX: %i \tPos: %i", contY, contX, posArq);
-            //printf("\n %s == %s", adicionar, lido);
+            printf("\n %s == %s", adicionar, lido);
             //printf("\n Pos: %i", posArq);
-            int idMapa;
-            idMapa = buscaBloco(argv, idPai-1, 0);
+            //int idMapa;
+            //idMapa = buscaBloco(argv, idPai-1, 0);
 
             posArq = 3 + retornaCeil(auxArgv2) + 2 + (int)sizeof(INODE) * contY;
         }
@@ -643,28 +681,10 @@ int     verDupDire              (char** argv)
 
     return existe;
 }
-
-int     buscaBloco              (char** argv, int idPai, int idBloc)
+int     buscaIdPai              (char** argv)
 {
-    int idMapa, posArq = 0;
-    char auxArgv1, auxArgv2, auxArgv3;
-    FILE *arquivoBuscaBloco;
+    int idPai;
 
-    arquivoBuscaBloco = fopen(argv[1],"r+b");
-    if (arquivoBuscaBloco != NULL)                                                            //VERIFICA ARQUIVO .bin NO DIRETORIO
-    {    
-        fseek(arquivoBuscaBloco, posArq++, SEEK_SET);
-            fread(&auxArgv1, sizeof(char), 1, arquivoBuscaBloco); 
-        fseek(arquivoBuscaBloco, posArq++, SEEK_SET);
-            fread(&auxArgv2, sizeof(char), 1, arquivoBuscaBloco); 
-        fseek(arquivoBuscaBloco, posArq++, SEEK_SET);
-            fread(&auxArgv3, sizeof(char), 1, arquivoBuscaBloco);
-        posArq = 17 + retornaCeil((int)auxArgv2) + idBloc + (idPai * (int)sizeof(INODE));
 
-        printf("\n posArq: %i \tidMapa: %i", posArq, idMapa);
-        fseek(arquivoBuscaBloco, posArq++, SEEK_SET);
-            fread(&idMapa, sizeof(char), 1, arquivoBuscaBloco);
-    }
-    fclose(arquivoBuscaBloco);
-    return idMapa;
+    return idPai;
 }
