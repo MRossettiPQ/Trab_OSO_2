@@ -43,7 +43,7 @@ int main                    ()
         int tamEntrada = strlen(tempStr);
         for (contX = 0; contX < 5; contX++)
         {
-            argv[contX] = (char*) malloc(tamEntrada * sizeof(char));
+            argv[contX] = (char*) malloc(sizeof(char));
         }
         contY = 0;
         contX = 0;
@@ -262,70 +262,73 @@ int   direSistemaArquivos       (char** argv)                           //Cria o
     if (direArquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
     {
         fseek(direArquivo, posArq++, SEEK_SET);
-        printf("\nArquivo");
         fseek(direArquivo, posArq++, SEEK_SET);         
-        fread(&auxArgv1, sizeof(int), 1, direArquivo);                              //Numero de Blocos
+            fread(&auxArgv1, sizeof(int), 1, direArquivo);                          //Numero de Blocos
         fseek(direArquivo, posArq++, SEEK_SET); 
-        fread(&auxArgv2, sizeof(int), 1, direArquivo);                              //Numero de Inodes
+            fread(&auxArgv2, sizeof(int), 1, direArquivo);                          //Numero de Inodes
         //printf("\n auxArgv1: %i \t auxArgv2: %i", auxArgv1, auxArgv2);
-
-        idDirRaiz = posDiretorioRaiz(argv);                                         //
-        printf("\n id Diretorio raiz: %i", idDirRaiz);
-        if(idDirRaiz == 0x00)
+        if(0 == verDupDire(argv))
         {
-            idInode = achaInodoLivre(argv);
-            printf("\n ADICIONA DIRETORIO\n\tidInode: %i", idInode);
-            if(idInode != 0)
+            idDirRaiz = posDiretorioRaiz(argv);                                         //
+            printf("\n id Diretorio raiz: %i", idDirRaiz);
+            if(idDirRaiz == 0x01)
             {
-                posArq = 2 + retornaCeil(auxArgv1) + sizeof(INODE) * idInode;
-                fseek(direArquivo, posArq++, SEEK_SET);
-                    sprintf (auxENT, "%c", 0x01);                   //IS_USED
-                fwrite(&auxENT, sizeof(char), 1, direArquivo); 
-                fseek(direArquivo, posArq++, SEEK_SET);
-                    sprintf (auxENT, "%c", 0x01);                   //IS_DIR
-                fwrite(&auxENT, sizeof(char), 1, direArquivo); 
-
-                sizeNome = strlen(argv[2]);                         //TAMANHO NOME                
-                for(contX = 1; contX < sizeNome; contX++)
+                idInode = achaInodoLivre(argv);
+                printf("\n ADICIONA DIRETORIO\n\tidInode: %i", idInode);
+                if(idInode != 0)
                 {
-                    fseek(arquivo, posArq++, SEEK_SET);
-                    sprintf (auxENT, "%c", argv[3][contX]);      //NOME DIRETORIO
-                    fwrite(&auxENT, sizeof(char), 1, arquivo);  
-                }
-                for(contX = 0; contX < (11 - sizeNome); contX++)
-                {
+                    posArq = 3 + retornaCeil(auxArgv1) + ((int)sizeof(INODE) * (idInode - 1));
+                    printf("\n posArq: %i", posArq);        
                     fseek(direArquivo, posArq++, SEEK_SET);
-                    sprintf (auxENT, "%c", 0x3a);                //NOME DIRETORIO
-                    fwrite(&auxENT, sizeof(char), 1, direArquivo);  
-                }
+                        sprintf (auxENT, "%c", 0x01);                   //IS_USED
+                        fwrite(&auxENT, sizeof(char), 1, direArquivo); 
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        sprintf (auxENT, "%c", 0x01);                   //IS_DIR
+                        fwrite(&auxENT, sizeof(char), 1, direArquivo); 
 
-                sprintf (auxENT, "%x", sizeNome);                   //char TAMANHO NOME
-                printf("\n %s", auxHEX);
-                aux = (int)strtol(auxENT, NULL, 10);
-                fseek(direArquivo, posArq++, SEEK_SET);
-                fwrite(&aux, sizeof(char), 1, direArquivo);             //TAMANHO NOME
+                    
+                    sizeNome = strlen(argv[2]);                             //TAMANHO NOME 
+                    int contNome = 1;
 
-                sprintf (auxENT, "%c", 0x02);
-                for(contX = 0; contX < 3; contX++)                  //Bloco direto      
-                {
-                    fseek(direArquivo, posArq++, SEEK_SET);       
-                    fwrite(&auxENT, sizeof(char), 1, direArquivo); 
-                }               
+                    for(contX = 1; contX < sizeNome; contX++)
+                    {
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        sprintf (auxENT, "%c", argv[2][contX]);         //NOME DIRETORIO
+                        fwrite(&auxENT, sizeof(char), 1, direArquivo);  
+                    }
+                    for(contX = 0; contX < (11 - sizeNome); contX++)
+                    {
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        sprintf (auxENT, "%c", 0x00);                   //NOME DIRETORIO
+                        fwrite(&auxENT, sizeof(char), 1, direArquivo);  
+                    }
 
-                sprintf (auxENT, "%c", 0x00);                       //Não implementado
-                for(contX = 0; contX < 3; contX++)
-                {   
+                    sprintf (auxENT, "%x", sizeNome);                   //char TAMANHO NOME
+                    printf("\n %s", auxHEX);
+                    aux = (int)strtol(auxENT, NULL, 10);
                     fseek(direArquivo, posArq++, SEEK_SET);
-                    fwrite(&auxENT, sizeof(char), 1, direArquivo); 
+                    fwrite(&aux, sizeof(char), 1, direArquivo);         //TAMANHO NOME
+
+                    sprintf (auxENT, "%c", 0x02);
+                    for(contX = 0; contX < 3; contX++)                  //Bloco direto      
+                    {
+                        fseek(direArquivo, posArq++, SEEK_SET);       
+                        fwrite(&auxENT, sizeof(char), 1, direArquivo); 
+                    }               
+                    sprintf (auxENT, "%c", 0x00);                       //Não implementado
+                    for(contX = 0; contX < 3; contX++)
+                    {   
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        fwrite(&auxENT, sizeof(char), 1, direArquivo); 
+                    }
+                    for(contX = 0; contX < 3; contX++)
+                    {   
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        fwrite(&auxENT, sizeof(char), 1, direArquivo); 
+                    } 
                 }
-                for(contX = 0; contX < 3; contX++)
-                {   
-                    fseek(direArquivo, posArq++, SEEK_SET);
-                    fwrite(&auxENT, sizeof(char), 1, direArquivo); 
-                } 
             }
-        }
-            
+        } 
     }
     fclose(direArquivo);
 
@@ -545,4 +548,123 @@ void    verificaArquivo         (char** argv)                           //Funç�
         system(cmdCC);
         //printf("\n Arquivo gerado\n\n");
     }
+}
+
+int     buscaIdPai              (char** argv)
+{
+    int idPai;
+
+
+    return idPai;
+}
+
+int     verDupDire              (char** argv)
+{
+    int tamEntrada = strlen(argv[2]), tamanhoRaiz, idInode = 0, posArq = 0, contX = 1, contY, idPai = 0;
+    char auxRaiz[tamEntrada], auxRaizRaiz[tamEntrada], auxArquivo[tamEntrada], adicionar[tamEntrada], lido[10];
+    char carac, auxArgv1, auxArgv2, auxArgv3, auxHEX[10], auxENT[10];
+    int existe;
+    FILE *verDup;
+    verDup = fopen(argv[1],"r+b");
+    if (verDup!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
+    {
+        fseek(verDup, posArq++, SEEK_SET);
+            fread(&auxArgv1, sizeof(int), 1, verDup);
+        fseek(verDup, posArq++, SEEK_SET);         
+            fread(&auxArgv2, sizeof(int), 1, verDup);                           //Numero de Blocos
+        fseek(verDup, posArq++, SEEK_SET); 
+            fread(&auxArgv3, sizeof(int), 1, verDup);                           //Numero de Inode
+        
+        posArq = posArq + retornaCeil(auxArgv2) + 2;
+        int conAgv1 = auxArgv1, conAgv2 = auxArgv2, conAgv3 = auxArgv3;
+        sprintf (auxRaizRaiz, "%c", argv[2][0]);
+        while((contX < tamEntrada) && (argv[2][contX] != '/'))              //RAIZRAIZ
+        {   
+            sprintf (auxRaizRaiz, "%s%c", auxRaizRaiz, argv[2][contX]);
+            contX = contX + 1;
+        }
+        sprintf (auxRaiz, "%c", argv[2][contX]);
+        contX = contX + 1;
+        while((contX < tamEntrada) && (argv[2][contX] != '/'))               //RAIZ
+        {   
+            sprintf (auxRaiz, "%s%c", auxRaiz, argv[2][contX]);
+            contX = contX + 1;
+        }
+        //printf("\n RaizRaiz: %s \t- Raiz: %s", auxRaizRaiz, auxRaiz);
+        if(strlen(auxRaiz) == 0)                                                        //RAIZRAIZ deve ser adicionado
+        {
+            strcpy(adicionar, auxRaizRaiz);
+            idPai = 0;
+        }
+        else                                                                            //RAIZ deve ser adicionado
+        {
+            strcpy(adicionar, auxRaiz);
+
+        }
+        //printf("\n adicionar: %s", adicionar);
+        posArq = 3 + retornaCeil(auxArgv2) + 2;
+        for(contY = 0; contY < (int)conAgv3; contY++)
+        {
+            //printf("\n Proximo INODE");
+            contX = 0;
+            fseek(verDup, posArq++, SEEK_SET);
+                fread(&carac, sizeof(int), 1, verDup);
+                sprintf(lido,"/%c", carac);
+            do
+            {
+                //printf("\n Pos: %i", posArq);
+                fseek(verDup, posArq++, SEEK_SET);
+                    fread(&carac, sizeof(int), 1, verDup);
+                    sprintf(lido,"%s%c", lido, carac);
+                contX++;
+            }while((contX < 10) && (carac != 0x00));
+            //printf("\nFrase Completa: %s", lido);
+            
+            //printf("\n Pos: %i", posArq);
+            if(0 == strcmp(adicionar, lido))
+            {
+                idPai = contY;
+                printf("\n Pasta existe\t idPai: %i", idPai);
+            }
+            posArq = 0;
+                fseek(verDup, posArq++, SEEK_SET);
+            //printf("\n contY: %i \tcontX: %i \tPos: %i", contY, contX, posArq);
+            //printf("\n %s == %s", adicionar, lido);
+            //printf("\n Pos: %i", posArq);
+            int idMapa;
+            idMapa = buscaBloco(argv, idPai-1, 0);
+
+            posArq = 3 + retornaCeil(auxArgv2) + 2 + (int)sizeof(INODE) * contY;
+        }
+    
+    
+    }
+    fclose(verDup);
+
+    return existe;
+}
+
+int     buscaBloco              (char** argv, int idPai, int idBloc)
+{
+    int idMapa, posArq = 0;
+    char auxArgv1, auxArgv2, auxArgv3;
+    FILE *arquivoBuscaBloco;
+
+    arquivoBuscaBloco = fopen(argv[1],"r+b");
+    if (arquivoBuscaBloco != NULL)                                                            //VERIFICA ARQUIVO .bin NO DIRETORIO
+    {    
+        fseek(arquivoBuscaBloco, posArq++, SEEK_SET);
+            fread(&auxArgv1, sizeof(char), 1, arquivoBuscaBloco); 
+        fseek(arquivoBuscaBloco, posArq++, SEEK_SET);
+            fread(&auxArgv2, sizeof(char), 1, arquivoBuscaBloco); 
+        fseek(arquivoBuscaBloco, posArq++, SEEK_SET);
+            fread(&auxArgv3, sizeof(char), 1, arquivoBuscaBloco);
+        posArq = 17 + retornaCeil((int)auxArgv2) + idBloc + (idPai * (int)sizeof(INODE));
+
+        printf("\n posArq: %i \tidMapa: %i", posArq, idMapa);
+        fseek(arquivoBuscaBloco, posArq++, SEEK_SET);
+            fread(&idMapa, sizeof(char), 1, arquivoBuscaBloco);
+    }
+    fclose(arquivoBuscaBloco);
+    return idMapa;
 }

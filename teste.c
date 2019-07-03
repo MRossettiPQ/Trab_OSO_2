@@ -1,6 +1,6 @@
 /*
     Para compilar no terminal use:
-    gcc main.c -o main -lssl -lcrypto -lm
+    gcc teste.c -o teste -lssl -lcrypto -lm
     para executar ./main
     para init       - ./main init fs.bin
     para add        - ./main add fs.bin
@@ -163,51 +163,4 @@ int     addDirRaiz    (char argc, char ** argv)                           //Fun�
     //printf("\nidMapa: %i", idMapa);
 
     return idInode;     
-}
-double   retornaCeil        (double numInodes)
-{
-    double divide = numInodes/8, result;
-    result = ceil(divide);
-    //printf("\nEntrada: %f\nDivide: %f\nCeil: %f", numInodes, divide, result);         //Debug da função
-
-    return result;
-}
-
-int buscaBlock              (char argc, char **argv, int idPai, int idBloc)
-{
-    int idMapa, posArq = 0;
-    char auxArgv1, auxArgv2, auxArgv3;
-    FILE *arquivo;
-
-    arquivo = fopen(argv[2],"r+b");
-    if (arquivo != NULL)                                                            //VERIFICA ARQUIVO .bin NO DIRETORIO
-    {    
-        fseek(arquivo, posArq++, SEEK_SET);
-            fread(&auxArgv1, sizeof(char), 1, arquivo); 
-        fseek(arquivo, posArq++, SEEK_SET);
-            fread(&auxArgv2, sizeof(char), 1, arquivo); 
-        fseek(arquivo, posArq++, SEEK_SET);
-            fread(&auxArgv3, sizeof(char), 1, arquivo); 
-
-        int dadoMapa, contX = 0, posMapa = 0, pai = idPai, ag = auxArgv3, bloco = bloco;
-
-
-        posArq = posArq + bloco + pai * (int)sizeof(INODE);
-        printf("\n pos: %i", posArq);
-
-        fseek(arquivo, posArq++, SEEK_SET);
-            fread(&idMapa, sizeof(char), 1, arquivo);
-
-        posMapa = posArq;
-
-        //printf("\n %i", ((int)auxArgv3 - idPai) * (int)sizeof(INODE));
-        
-        fseek(arquivo, posMapa++, posArq);
-            fread(&dadoMapa, sizeof(char), 1, arquivo);
-
-        printf("\n posArq: %i \t idMapaI: %i     \tidMapaC: %c", posArq, idMapa, idMapa);
-        printf("\n posMapa: %i \t dadMapaI: %i    \tdadMapaC: %c", posMapa, dadoMapa, dadoMapa); 
-    }
-    fclose(arquivo);
-    return idMapa;
 }
