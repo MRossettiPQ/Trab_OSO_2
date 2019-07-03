@@ -20,15 +20,22 @@
     #include "inode.h"                                                  // 
     #include "sha256.c"                                                 //
     //Declaração função
-    int     criaSistemaArquivos     (char argc, char ** argv);
-    int     direSistemaArquivos     (char argc, char ** argv);
-    int     fileSistemaArquivos     (char argc, char ** argv);
-    void    verificaArquivo         (char argc, char ** argv);
-    int     posDiretorioRaiz        (char argc, char ** argv);
-    int     achaInodoLivre          (char argc, char ** argv);
+    void    verificaArquivo         (char** argv);
+    
+    int     criaSistemaArquivos     (char** argv);
+    int     fileSistemaArquivos     (char** argv);
+    
+    int     posDiretorioRaiz        (char** argv);
+    int     achaInodoLivre          (char** argv);
+    int     posInode                (char** argv);
+    
+    int     direSistemaArquivos     (char** argv);
+    int     addPastaRaiz            (char** argv);
+    int     addPasta                (char** argv);
+
     double  retornaCeil             (double numInodes);
 
-    typedef struct 
+    typedef struct  
     {
         char                tamBloco;
         char                numBloco;

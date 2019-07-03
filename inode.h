@@ -8,8 +8,8 @@ typedef struct
     char NAME[10];                                                      // Nome do arquivo/dir
     char SIZE;                                                          // Tamanho do arquivo/dir em bytes
     unsigned char DIRECT_BLOCKS[3];                                     // 
-    unsigned char INDIRECT_BLOCKS[3];                                   // 
-    unsigned char DOUBLE_INDIRECT_BLOCKS[3];                            // 
+    unsigned char INDIRECT_BLOCKS[3];                                   // NÃO PRECISA IMPLEMNTAR
+    unsigned char DOUBLE_INDIRECT_BLOCKS[3];                            // NÃO PRECISA IMPLEMNTAR
 } INODE;
 
 #endif /* inode_h */
