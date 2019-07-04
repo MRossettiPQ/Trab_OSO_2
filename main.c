@@ -22,7 +22,7 @@
 //Função principal
 int main                    ()
 {
-    int maxLen = 50 + 2, totalCount = 0, contX = 0, contY = 0, contZ = 0, aux;
+    int maxLen = 50 + 2, totalCount = 0, contX = 0, contY = 0, contZ = 0, aux, tamFrase;
     char *tempStr = (char*)malloc(maxLen * sizeof(char));
     char cmdCC[200], auxSprintf, *questiona = (char*)malloc(sizeof(char)), pathSis[256];
     size_t  len;
@@ -39,7 +39,6 @@ int main                    ()
             }
             totalCount += (int)len;
         }while ((int)len > maxLen);
-        //printf("\n Comando: %s", tempStr);
         int tamEntrada = strlen(tempStr);
         for (contX = 0; contX < 5; contX++)
         {
@@ -57,13 +56,13 @@ int main                    ()
                 sprintf (argv[contY], "%s%c", argv[contY], tempStr[contX]);
                 contX = contX + 1;
             }
-            //printf("\nTamanho da frase: %i", tamFrase);
+            int tamFrase = strlen(argv[contY]);
             //printf("\n Frase: %s", argv[contY]);
             contY = contY + 1;
             contX = contX + 1;
         }
     }
-    aux =  verDupDire              (argv, 0);
+    //aux =  verDupDire              (argv, 0);
     //printf("\n Decide a função");
     if(0 == strcmp(argv[0], "init"))
     {
@@ -73,7 +72,7 @@ int main                    ()
         //printf("\n Sistema de Arquivos Criado\n");
         
         getcwd(pathSis, sizeof(pathSis));                                   //Busca o PATH do diretorio do programa
-        auxSprintf = sprintf(cmdCC, "%s/%s", pathSis, argv[2]);             //Gera o PATH para o arquivo desejado
+        auxSprintf = sprintf(cmdCC, "%s/%s", pathSis, argv[1]);             //Gera o PATH para o arquivo desejado
         printf("\n\nPath: %s\nHash: ", cmdCC);                              //Imprime o PATH do diretorio do programa
         printSha256(cmdCC);                                                 //Imprime a HASH
     }
@@ -84,7 +83,7 @@ int main                    ()
         aux = fileSistemaArquivos(argv);
         printf("\n Arquivo Adicionado ao Sistema de Arquivos Criado\n");
         getcwd(pathSis, sizeof(pathSis));                                   //Busca o PATH do diretorio do programa
-        auxSprintf = sprintf(cmdCC, "%s/%s", pathSis, argv[2]);             //Gera o PATH para o arquivo desejado
+        auxSprintf = sprintf(cmdCC, "%s/%s", pathSis, argv[1]);             //Gera o PATH para o arquivo desejado
         printf("\n\nPath: %s\nHash: ", cmdCC);                              //Imprime o PATH do diretorio do programa
         printSha256(cmdCC);                                                 //Imprime a HASH
     }
@@ -95,7 +94,7 @@ int main                    ()
         aux = direSistemaArquivos(argv); 
         printf("\n Diretorio Adicionado ao Sistema de Arquivos Criado\n");
         getcwd(pathSis, sizeof(pathSis));                                   //Busca o PATH do diretorio do programa
-        auxSprintf = sprintf(cmdCC, "%s/%s", pathSis, argv[2]);             //Gera o PATH para o arquivo desejado
+        auxSprintf = sprintf(cmdCC, "%s/%s", pathSis, argv[1]);             //Gera o PATH para o arquivo desejado
         printf("\n\nPath: %s\nHash: ", cmdCC);                              //Imprime o PATH do diretorio do programa
         printSha256(cmdCC);                                                 //Imprime a HASH
     }    
@@ -105,7 +104,7 @@ int main                    ()
         printf("\n Imprime a HASH");
         getcwd(pathSis, sizeof(pathSis));                                   //Busca o PATH do diretorio do programa
         verificaArquivo(argv);                                              //Verifica se o .bin passado existe
-        auxSprintf = sprintf(cmdCC, "%s/%s", pathSis, argv[2]);             //Gera o PATH para o arquivo desejado
+        auxSprintf = sprintf(cmdCC, "%s/%s", pathSis, argv[1]);             //Gera o PATH para o arquivo desejado
         printf("\n\nPath: %s\n\nHash: ", cmdCC);                            //Imprime o PATH do diretorio do programa
         printSha256(cmdCC);                                                 //Imprime a HASH
     }
@@ -119,96 +118,72 @@ int main                    ()
 	return 0;	
 }
 
+int     idDirPai    (char ** argv)                           //Função que retorna Diretorio Raiz
+{	
+    int tamEntrada = strlen(argv[3]), tamanhoRaiz, idInode = 0, posArq = 0, contX = 1, contY, idPai = 0;
+    char auxRaiz[tamEntrada], auxRaizRaiz[tamEntrada], auxArquivo[tamEntrada], adicionar[tamEntrada], lido[10];
+    char carac, auxArgv1, auxArgv2, auxArgv3, auxHEX[10];
+    FILE *arquivo;
 
+    sprintf (auxRaizRaiz, "%c", argv[3][0]);
+    while((contX < tamEntrada) && (argv[3][contX] != '/'))              //RAIZRAIZ
+    {   
+        sprintf (auxRaizRaiz, "%s%c", auxRaizRaiz, argv[3][contX]);
+        contX = contX + 1;
+    }
+    sprintf (auxRaiz, "%c", argv[3][contX]);
+    contX = contX + 1;
+    while((contX < tamEntrada) && (argv[3][contX] != '/'))               //RAIZ
+    {   
+        sprintf (auxRaiz, "%s%c", auxRaiz, argv[3][contX]);
+        contX = contX + 1;
+    }
+    if(strlen(auxRaiz) == 0)                                                        //RAIZRAIZ deve ser adicionado
+    {
+        idInode = 0;
+    }
+    else                                                                            //RAIZ deve ser adicionado
+    {
+        idInode = ACHAPAI(argv, idPai);
+    }
+
+    return idInode;     
+}
 int   fileSistemaArquivos       (char** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
 {
-    // ADICIONA ARQUIVO             - add "nome arquivo.bin" "Nome Arquivo para o Sistema" "Texto do arquivo"
-    // ADICIONA ARQUIVO             - add fs.bin /teste.txt abcd
-    int posArq = 1, idInode, idDirRaiz, sizeNome, sizeBloco, contX, aux;
-    char auxHEX[10], auxArgv1, auxArgv2, auxENT[10];
-    verificaArquivo(argv);                                                //Chama a verificação do arquivo .bin
-    FILE *arquivo;
-    arquivo = fopen(argv[1],"r+b");
-    if (arquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
-    {
-        fseek(arquivo, posArq, SEEK_SET);
-        fread(&auxArgv1, sizeof(int), 1, arquivo); 
-        posArq = posArq + 1;
-        fseek(arquivo, posArq, SEEK_SET);
-        fread(&auxArgv2, sizeof(int), 1, arquivo); 
-        //printf("\n auxArgv1: %i \t auxArgv2: %i", auxArgv1, auxArgv2);
+    int tamEntrada = strlen(argv[2]), tamanhoRaiz, contX = 1, contY;
+    printf("\ntamEntrada: %i", tamEntrada);
+    char *auxRaiz = (char*)malloc(tamEntrada * sizeof(char)), *auxRaizRaiz = (char*)malloc(tamEntrada * sizeof(char)), *auxArquivo = (char*)malloc(tamEntrada * sizeof(char)), *adicionar = (char*)malloc(tamEntrada * sizeof(char)), *lido = (char*)malloc(tamEntrada * sizeof(char));
+    char carac, auxArgv1, auxArgv2, auxArgv3, auxHEX[10], auxENT[10];
 
-        idInode = achaInodoLivre(argv);
-        //printf("\n\tidInode: %i", idInode);
-        if(idInode != 0)
-        {
-            posArq = 2 + retornaCeil(auxArgv1) + (idInode-1) * sizeof(INODE) + 1;
-            //printf("\n\tposArq: %i", posArq);
-            fseek(arquivo, posArq, SEEK_SET);
-                sprintf (auxENT, "%c", 0x01);                   //IS_USED
-            fwrite(&auxENT, sizeof(char), 1, arquivo); 
-                sprintf (auxENT, "%c", 0x00);                   //IS_DIR
-            fwrite(&auxENT, sizeof(char), 1, arquivo); 
-
-            sizeNome = strlen(argv[3]);                         //TAMANHO NOME                
-            for(contX = 1; contX < sizeNome; contX++)
-            {
-                sprintf (auxENT, "%c", argv[3][contX]);         //NOME DIRETORIO
-                fwrite(&auxENT, sizeof(char), 1, arquivo);  
-            }
-            for(contX = 0; contX < (11 - sizeNome); contX++)
-            {
-                sprintf (auxENT, "%c", 0x00);                //NOME DIRETORIO
-                fwrite(&auxENT, sizeof(char), 1, arquivo);  
-            }
-            sprintf (auxENT, "%c", sizeNome);                   //char TAMANHO NOME
-            fwrite(&auxENT, sizeof(char), 1, arquivo);          //TAMANHO NOME
-
-
-            sizeBloco = strlen(argv[4]);                        //Tamanho conteudo arquivo 
-            /*              
-            for(contX = 1; contX < sizeNome; contX++)           //Conteudo arquivo   
-            {
-                sprintf (auxENT, "%c", argv[4][contX]);         
-                fwrite(&auxENT, sizeof(char), 1, arquivo);  
-            }
-            for(contX = 0; contX < (4 - sizeBloco); contX++)
-            {
-                sprintf (auxENT, "%c", 0x00);                   //NOME DIRETORIO
-                fwrite(&auxENT, sizeof(char), 1, arquivo);  
-            }
-            */
-            
-            sprintf (auxENT, "%c", 0x26); 
-            for(contX = 0; contX < 3; contX++)
-            {   
-                fwrite(&auxENT, sizeof(char), 1, arquivo); 
-            }
-            sprintf (auxENT, "%c", 0x00); 
-            for(contX = 0; contX < 3; contX++)
-            {   
-                fwrite(&auxENT, sizeof(char), 1, arquivo); 
-            }
-            for(contX = 0; contX < 3; contX++)
-            {   
-                fwrite(&auxENT, sizeof(char), 1, arquivo); 
-            }  
+        sprintf (auxRaizRaiz, "%c", argv[2][0]);
+        printf("\n tamEntrada: %i", tamEntrada);
+        while((contX < tamEntrada) && (argv[2][contX] != '/'))              //RAIZRAIZ
+        {   
+            sprintf (auxRaizRaiz, "%s%c", auxRaizRaiz, argv[2][contX]);
+            contX = contX + 1;
         }
-        posArq = 2 + retornaCeil(auxArgv1) +  auxArgv2 * sizeof(INODE);
-        fseek(arquivo, posArq, SEEK_SET);
-        sprintf (auxENT, "%c", idInode);    
-        fwrite(&auxENT, sizeof(char), 1, arquivo);
+        sprintf (auxRaiz, "%c", argv[2][contX]);
+        contX = contX + 1;
+    while((contX < tamEntrada) && (argv[2][contX] != '/'))               //RAIZ
+    {   
+        sprintf (auxRaiz, "%s%c", auxRaiz, argv[2][contX]);
+        contX = contX + 1;
     }
-    fclose(arquivo);
+    if(strlen(auxRaiz) == 0)                                                        //RAIZRAIZ deve ser adicionado
+    {
+        strcpy(adicionar, auxRaizRaiz);
+    }
+    else                                                                            //RAIZ deve ser adicionado
+    {
+        strcpy(adicionar, auxRaiz);
+    }
 
-    return 0;
-}
-int   direSistemaArquivos       (char** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
-{
+
+
     // ADICIONA DIRETORIO           - addDir "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
     // ADICIONA DIRETORIO           - addDir fs.bin /etc
-    int posArq = 0, idInode, idDirRaiz, sizeNome, contX, aux, auxAr, idPai = 0;
-    char auxHEX[10], auxArgv1, auxArgv2, auxENT[10];
+    int posArq = 0, idInode, idDirRaiz, sizeNome, aux, auxAr;
     verificaArquivo(argv);                                                          //Chama a verificação do arquivo .bin
     
     FILE *direArquivo;
@@ -223,9 +198,11 @@ int   direSistemaArquivos       (char** argv)                           //Cria o
         //printf("\n auxArgv1: %i \t auxArgv2: %i", auxArgv1, auxArgv2);
         auxAr = (int)auxArgv2;
        
-        if(0 == verDupDire(argv, 0))
+        int idPai = idDirPai(argv);                       //
+        printf("\n idPai: %i", idPai);
+        if(0 == verDupDire(argv, idPai))
         {
-            idDirRaiz = posDiretorioRaiz(argv);                                         //
+            idDirRaiz = posDiretorioRaiz(argv);                                      //
             printf("\n id Diretorio raiz: %i", idDirRaiz);
             if(idDirRaiz == 0x00)
             {
@@ -261,13 +238,174 @@ int   direSistemaArquivos       (char** argv)                           //Cria o
                         fwrite(&auxENT, sizeof(char), 1, direArquivo); 
 
                     
-                    sizeNome = strlen(argv[2]);                             //TAMANHO NOME 
+                    sizeNome = strlen(adicionar);                             //TAMANHO NOME 
                     int contNome = 1;
 
                     for(contX = 1; contX < sizeNome; contX++)
                     {
                         fseek(direArquivo, posArq++, SEEK_SET);
-                        sprintf (auxENT, "%c", argv[2][contX]);         //NOME DIRETORIO
+                        sprintf (auxENT, "%c", adicionar[contX]);         //NOME DIRETORIO
+                        fwrite(&auxENT, sizeof(char), 1, direArquivo);  
+                    }
+                    for(contX = 0; contX < (11 - sizeNome); contX++)
+                    {
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        sprintf (auxENT, "%c", 0x00);                   //NOME DIRETORIO
+                        fwrite(&auxENT, sizeof(char), 1, direArquivo);  
+                    }
+
+                    sprintf (auxENT, "%x", sizeNome);                   //char TAMANHO NOME
+                        printf("\n %s", auxHEX);
+                        aux = (char)strtol(auxENT, NULL, 16);
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        fwrite(&aux, sizeof(int), 1, direArquivo);          //TAMANHO NOME
+                    
+
+                    //fseek(direArquivo, posArq++, SEEK_SET);       
+                    //fwrite(&auxENT, sizeof(char), 1, direArquivo);
+                    //sprintf (auxENT, "%i", 0x03);
+                    for(contX = 0; contX < 3; contX++)                  //Bloco direto      
+                    {
+                        sprintf (auxENT, "%c", 0x7F);
+                        fseek(direArquivo, posArq++, SEEK_SET);       
+                        fwrite(&auxENT, sizeof(char), 1, direArquivo); 
+                    }               
+                    sprintf (auxENT, "%c", 0x00);                       //Não implementado
+                    for(contX = 0; contX < 3; contX++)
+                    {   
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        fwrite(&auxENT, sizeof(char), 1, direArquivo); 
+                    }
+                    for(contX = 0; contX < 3; contX++)
+                    {   
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        fwrite(&auxENT, sizeof(char), 1, direArquivo); 
+                    }
+                    //Atualiza Vetor de Blocos
+                    posArq = 0;
+                    int sizeTexto = strlen(argv[3]);                             //TAMANHO NOME 
+
+                    idMapa = buscaIdMapa(argv, idDirRaiz);
+                    fseek(direArquivo, 0, SEEK_SET);
+                    posArq = 4 + retornaCeil((int)auxArgv1) + (int)sizeof(INODE) * (int)auxArgv2 + idMapa ;
+                    for(contX = 0; contX < sizeTexto; contX++)
+                    {
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        sprintf (auxENT, "%c", argv[3][contX]);         //NOME DIRETORIO
+                        fwrite(&auxENT, sizeof(char), 1, direArquivo);  
+                    }
+
+                    //Atualiza Bloco Pai
+                    posArq = 0;
+                        //idMapa = buscaIdMapa(argv, idDirRaiz);
+                        fseek(direArquivo, 0, SEEK_SET);
+                        posArq = 3 + retornaCeil((int)auxArgv1) + 13 * (idPai + 1);
+                        //printf("\n\n idMapa: %i - posArq: %i", idMapa, posArq);
+                        //printf("\n (int)sizeof(INODE) * idDirRaiz: %i", (int)sizeof(INODE) * idDirRaiz);
+                        //sprintf (auxENT, "%c", idInode-1);                       //Não implementado
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        fwrite(&posicaoVetorBloco, sizeof(char), 1, direArquivo);
+                }
+            }
+        } 
+    }
+}
+int   direSistemaArquivos       (char** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
+{
+    int tamEntrada = strlen(argv[2]), tamanhoRaiz, contX = 1, contY;
+    printf("\ntamEntrada: %i", tamEntrada);
+    char *auxRaiz = (char*)malloc(tamEntrada * sizeof(char)), *auxRaizRaiz = (char*)malloc(tamEntrada * sizeof(char)), *auxArquivo = (char*)malloc(tamEntrada * sizeof(char)), *adicionar = (char*)malloc(tamEntrada * sizeof(char)), *lido = (char*)malloc(tamEntrada * sizeof(char));
+    char carac, auxArgv1, auxArgv2, auxArgv3, auxHEX[10], auxENT[10];
+
+        sprintf (auxRaizRaiz, "%c", argv[2][0]);
+        printf("\n tamEntrada: %i", tamEntrada);
+        while((contX < tamEntrada) && (argv[2][contX] != '/'))              //RAIZRAIZ
+        {   
+            sprintf (auxRaizRaiz, "%s%c", auxRaizRaiz, argv[2][contX]);
+            contX = contX + 1;
+        }
+        sprintf (auxRaiz, "%c", argv[2][contX]);
+        contX = contX + 1;
+    while((contX < tamEntrada) && (argv[2][contX] != '/'))               //RAIZ
+    {   
+        sprintf (auxRaiz, "%s%c", auxRaiz, argv[2][contX]);
+        contX = contX + 1;
+    }
+    if(strlen(auxRaiz) == 0)                                                        //RAIZRAIZ deve ser adicionado
+    {
+        strcpy(adicionar, auxRaizRaiz);
+    }
+    else                                                                            //RAIZ deve ser adicionado
+    {
+        strcpy(adicionar, auxRaiz);
+    }
+
+
+
+    // ADICIONA DIRETORIO           - addDir "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
+    // ADICIONA DIRETORIO           - addDir fs.bin /etc
+    int posArq = 0, idInode, idDirRaiz, sizeNome, aux, auxAr;
+    verificaArquivo(argv);                                                          //Chama a verificação do arquivo .bin
+    
+    FILE *direArquivo;
+    direArquivo = fopen(argv[1],"r+b");
+    if (direArquivo != NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
+    {    
+        fseek(direArquivo, posArq++, SEEK_SET);
+        fseek(direArquivo, posArq++, SEEK_SET);         
+            fread(&auxArgv1, sizeof(int), 1, direArquivo);                          //Numero de Blocos
+        fseek(direArquivo, posArq++, SEEK_SET); 
+            fread(&auxArgv2, sizeof(int), 1, direArquivo);                          //Numero de Inodes
+        //printf("\n auxArgv1: %i \t auxArgv2: %i", auxArgv1, auxArgv2);
+        auxAr = (int)auxArgv2;
+       
+        int idPai = idDirPai(argv);                       //
+        printf("\n idPai: %i", idPai);
+        if(0 == verDupDire(argv, idPai))
+        {
+            idDirRaiz = posDiretorioRaiz(argv);                                      //
+            printf("\n id Diretorio raiz: %i", idDirRaiz);
+            if(idDirRaiz == 0x00)
+            {
+                idInode = achaInodoLivre(argv);
+                printf("\n ADICIONA DIRETORIO\n\tidInode: %i", idInode);
+                if(idInode != 0)
+                {    
+                    int idMB, troca;
+                        char auxTroca, posicaoVetorBloco;
+                        fseek(direArquivo, 0, SEEK_SET);
+                        posArq = 3;
+
+                    fseek(direArquivo, posArq++, SEEK_SET);
+                        fread(&auxTroca, sizeof(char), 1, direArquivo);
+                        sprintf(auxHEX, "%c", auxTroca);
+                        posArq = 3;
+                        posicaoVetorBloco = auxTroca;
+                        auxTroca = auxTroca + 1;
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        fwrite(&auxTroca, sizeof(char), 1, direArquivo);
+
+                    fseek(direArquivo, 0, SEEK_SET);
+                        posArq = 3 + retornaCeil(auxArgv1) + ((int)sizeof(INODE) * (idInode - 1));
+                        printf("\n posArq: %i", posArq);                     
+                        int idMapa = buscaVetor(argv);
+                        sprintf (auxENT, "%c", idMapa);  
+
+                    fseek(direArquivo, posArq++, SEEK_SET);
+                        sprintf (auxENT, "%c", 0x01);                   //IS_USED
+                        fwrite(&auxENT, sizeof(char), 1, direArquivo); 
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        sprintf (auxENT, "%c", 0x01);                   //IS_DIR
+                        fwrite(&auxENT, sizeof(char), 1, direArquivo); 
+
+                    
+                    sizeNome = strlen(adicionar);                             //TAMANHO NOME 
+                    int contNome = 1;
+
+                    for(contX = 1; contX < sizeNome; contX++)
+                    {
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        sprintf (auxENT, "%c", adicionar[contX]);         //NOME DIRETORIO
                         fwrite(&auxENT, sizeof(char), 1, direArquivo);  
                     }
                     for(contX = 0; contX < (11 - sizeNome); contX++)
@@ -666,7 +804,8 @@ int     buscaMapa               (char** argv, int idPai, int idMapa)
 int     verDupDire              (char** argv, int  idPai)
 {
     int tamEntrada = strlen(argv[2]), tamanhoRaiz, idInode = 0, posArq = 0, contX = 1, contY;
-    char auxRaiz[tamEntrada], auxRaizRaiz[tamEntrada], auxArquivo[tamEntrada], adicionar[tamEntrada], lido[10];
+    printf("\ntamEntrada: %i", tamEntrada);
+    char *auxRaiz = (char*)malloc(tamEntrada * sizeof(char)), *auxRaizRaiz = (char*)malloc(tamEntrada * sizeof(char)), *auxArquivo = (char*)malloc(tamEntrada * sizeof(char)), *adicionar = (char*)malloc(tamEntrada * sizeof(char)), *lido = (char*)malloc(tamEntrada * sizeof(char));
     char carac, auxArgv1, auxArgv2, auxArgv3, auxHEX[10], auxENT[10];
     int existe = 0;
     FILE *verDup;
@@ -683,6 +822,7 @@ int     verDupDire              (char** argv, int  idPai)
         posArq = posArq + retornaCeil(auxArgv2) + 2;
         int conAgv1 = auxArgv1, conAgv2 = auxArgv2, conAgv3 = auxArgv3;
         sprintf (auxRaizRaiz, "%c", argv[2][0]);
+        printf("\n tamEntrada: %i", tamEntrada);
         while((contX < tamEntrada) && (argv[2][contX] != '/'))              //RAIZRAIZ
         {   
             sprintf (auxRaizRaiz, "%s%c", auxRaizRaiz, argv[2][contX]);
@@ -705,6 +845,7 @@ int     verDupDire              (char** argv, int  idPai)
             strcpy(adicionar, auxRaiz);
 
         }
+        printf("\n adicionar: %s \t lido: %s \t auxRaiz: %s \t auxRaizRaiz: %s", adicionar, lido, auxRaiz, auxRaizRaiz);
 
         posArq = 0;
         posArq = 3 + retornaCeil(auxArgv2) + 4;
@@ -712,6 +853,7 @@ int     verDupDire              (char** argv, int  idPai)
         int idBloc = 0, idMapa = 0 , idNode;
         char carac;
         int nauxArgv3 = auxArgv3;
+        //printf("\n nauxArgv3: %i", nauxArgv3);
         for(contY = 0; contY < nauxArgv3; contY++)
         {
             //printf("\n PROXIMO INODE");
@@ -725,6 +867,8 @@ int     verDupDire              (char** argv, int  idPai)
                 sprintf(lido, "%s%c", lido, carac);
                 contX = contX + 1;
             }while ((contX < 10) && (carac != 0x00));
+
+            printf("\n %s == %s", lido, adicionar);
             if(0 == strcmp(adicionar, lido))
             {
                 existe = 1;
@@ -737,8 +881,9 @@ int     verDupDire              (char** argv, int  idPai)
             idMapa = buscaBloco(argv, idPai, idBloc);
             idNode = buscaMapa(argv, idPai, idMapa);
 
-
-            posArq = posArq + 10 + (10 - contX) * (int)idNode;
+            posArq = posArq + 10 + (11 - contX) * (int)idNode;
+            //posArq = posArq + (10 * (int)idNode);
+            //printf("\n Cont: %i", contY);
         }
         printf("\n Não existe");
     }
@@ -834,4 +979,93 @@ int     buscaVetor              (char** argv)
     }
     fclose(arquivoBuscaMapa);
     return troca;   
+}
+int     ACHAPAI              (char** argv, int  idPai)
+{
+    int tamEntrada = strlen(argv[2]), tamanhoRaiz, idInode = 0, posArq = 0, contX = 1, contY;
+    printf("\ntamEntrada: %i", tamEntrada);
+    char *auxRaiz = (char*)malloc(tamEntrada * sizeof(char)), *auxRaizRaiz = (char*)malloc(tamEntrada * sizeof(char)), *auxArquivo = (char*)malloc(tamEntrada * sizeof(char)), *adicionar = (char*)malloc(tamEntrada * sizeof(char)), *lido = (char*)malloc(tamEntrada * sizeof(char));
+    char carac, auxArgv1, auxArgv2, auxArgv3, auxHEX[10], auxENT[10];
+    int existe = 0;
+    FILE *verDup;
+    verDup = fopen(argv[1],"r+b");
+    if (verDup!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
+    {
+        fseek(verDup, posArq++, SEEK_SET);
+            fread(&auxArgv1, sizeof(int), 1, verDup);
+        fseek(verDup, posArq++, SEEK_SET);         
+            fread(&auxArgv2, sizeof(int), 1, verDup);                           //Numero de Blocos
+        fseek(verDup, posArq++, SEEK_SET); 
+            fread(&auxArgv3, sizeof(int), 1, verDup);                           //Numero de Inode
+        
+        posArq = posArq + retornaCeil(auxArgv2) + 2;
+        int conAgv1 = auxArgv1, conAgv2 = auxArgv2, conAgv3 = auxArgv3;
+        sprintf (auxRaizRaiz, "%c", argv[2][0]);
+        printf("\n tamEntrada: %i", tamEntrada);
+        while((contX < tamEntrada) && (argv[2][contX] != '/'))              //RAIZRAIZ
+        {   
+            sprintf (auxRaizRaiz, "%s%c", auxRaizRaiz, argv[2][contX]);
+            contX = contX + 1;
+        }
+        sprintf (auxRaiz, "%c", argv[2][contX]);
+        contX = contX + 1;
+        while((contX < tamEntrada) && (argv[2][contX] != '/'))               //RAIZ
+        {   
+            sprintf (auxRaiz, "%s%c", auxRaiz, argv[2][contX]);
+            contX = contX + 1;
+        }
+        if(strlen(auxRaiz) == 0)                                                        //RAIZRAIZ deve ser adicionado
+        {
+            strcpy(adicionar, auxRaizRaiz);
+            idPai = 0;
+        }
+        else                                                                            //RAIZ deve ser adicionado
+        {
+            strcpy(adicionar, auxRaiz);
+
+        }
+        printf("\n adicionar: %s \t lido: %s \t auxRaiz: %s \t auxRaizRaiz: %s", adicionar, lido, auxRaiz, auxRaizRaiz);
+
+        posArq = 0;
+        posArq = 3 + retornaCeil(auxArgv2) + 4;
+        contX = 0;
+        int idBloc = 0, idMapa = 0 , idNode;
+        char carac;
+        int nauxArgv3 = auxArgv3;
+        //printf("\n nauxArgv3: %i", nauxArgv3);
+        for(contY = 0; contY < nauxArgv3; contY++)
+        {
+            //printf("\n PROXIMO INODE");
+            contX = 0;
+            sprintf(lido, "/");
+            do
+            {
+                fseek(verDup, posArq++, SEEK_SET); 
+                fread(&carac, sizeof(char), 1, verDup);
+                //printf("\n carac: %c", carac);
+                sprintf(lido, "%s%c", lido, carac);
+                contX = contX + 1;
+            }while ((contX < 10) && (carac != 0x00));
+
+            printf("\n %s == %s", lido, adicionar);
+            if(0 == strcmp(adicionar, lido))
+            {
+                existe = idNode;
+                printf("\n Pasta existe\t idPai: %i", idPai);
+                return existe;
+            }
+            
+            contY = contY + 1;
+            fseek(verDup, 0, SEEK_SET);
+            idMapa = buscaBloco(argv, idPai, idBloc);
+            idNode = buscaMapa(argv, idPai, idMapa);
+
+            posArq = posArq + 10 + (11 - contX) * (int)idNode;
+            //posArq = posArq + (10 * (int)idNode);
+            //printf("\n Cont: %i", contY);
+        }
+        printf("\n Não existe");
+    }
+    fclose(verDup);
+    return existe;
 }
