@@ -32,9 +32,11 @@
     int     direSistemaArquivos     (char** argv);
     int     addPastaRaiz            (char** argv);
     int     buscaIdPai              (char** argv);
-    int     verDupDire              (char** argv);
+    int     verDupDire              (char** argv, int  idPai);
     int     buscaBloco              (char** argv, int idPai, int idBloc);
     int     buscaMapa               (char** argv, int idPai, int idMapa);
+    int     buscaIdMapa             (char** argv, int idPai);
+    int     buscaVetor              (char** argv);
 
     double  retornaCeil             (double numInodes);
 

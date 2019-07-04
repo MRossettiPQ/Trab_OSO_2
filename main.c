@@ -63,7 +63,7 @@ int main                    ()
             contX = contX + 1;
         }
     }
-
+    aux =  verDupDire              (argv, 0);
     //printf("\n Decide a função");
     if(0 == strcmp(argv[0], "init"))
     {
@@ -119,50 +119,6 @@ int main                    ()
 	return 0;	
 }
 
-int     achaInodoLivre          (char** argv)                           //Acha o INODO livre
-{
-    char auxArgv1, auxArgv2, auxArgv3;
-	int idInode = 0, posArq = 1, contX = 0, contY = 0;
-    FILE *arquivo;
-    arquivo = fopen(argv[1],"r+b");
-    if (arquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
-    {
-        fseek(arquivo, posArq, SEEK_SET);
-        fread(&auxArgv1, sizeof(int), 1, arquivo); 
-        posArq = posArq + 1;
-        fseek(arquivo, posArq, SEEK_SET);
-        fread(&auxArgv2, sizeof(int), 1, arquivo); 
-        //printf("\n auxArgv1: %i - auxArgv2: %i", auxArgv1, auxArgv2);
-
-        posArq = 3 + retornaCeil(auxArgv1); // + auxArgv2 * sizeof(INODE);
-
-        fseek(arquivo, posArq, SEEK_SET);
-        fread(&auxArgv3, sizeof(int), 1, arquivo); 
-    
-        //printf("\n posArq2: %i \t- auxArgv3: %i", posArq, auxArgv3);
-        idInode = 0; 
-        contY = 0;
-        for(contX = 0; contX < auxArgv2; contX++)
-        {   
-            //printf("\n posArq3: %i \t- auxArgv3: %i\n contX: %d \t- contY: %d ", posArq, auxArgv3, idInode, contY);
-            if (auxArgv3 == 0x00)
-            {
-                printf("\n SAINDO: %d", idInode + 1);
-                fclose(arquivo);
-                return idInode + 1;                                            //Indice do diretorio raiz
-            }
-            posArq = 5 + retornaCeil(auxArgv1) + (int)sizeof(INODE) * (contY + 1);
-            
-            fseek(arquivo, posArq, SEEK_SET);
-            fread(&auxArgv3, sizeof(int), 1, arquivo);
-            idInode = idInode + 1; 
-            contY = contY + 1;
-        }
-    }
-    fclose(arquivo);
-    printf("\n Sem espaço no INODO");
-    return 0;  
-}
 
 int   fileSistemaArquivos       (char** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
 {
@@ -251,7 +207,7 @@ int   direSistemaArquivos       (char** argv)                           //Cria o
 {
     // ADICIONA DIRETORIO           - addDir "nome arquivo.bin" "bytes do bloco" "Qt. de Blocos" "Qt. Inodes"
     // ADICIONA DIRETORIO           - addDir fs.bin /etc
-    int posArq = 0, idInode, idDirRaiz, sizeNome, contX, aux;
+    int posArq = 0, idInode, idDirRaiz, sizeNome, contX, aux, auxAr, idPai = 0;
     char auxHEX[10], auxArgv1, auxArgv2, auxENT[10];
     verificaArquivo(argv);                                                          //Chama a verificação do arquivo .bin
     
@@ -265,20 +221,38 @@ int   direSistemaArquivos       (char** argv)                           //Cria o
         fseek(direArquivo, posArq++, SEEK_SET); 
             fread(&auxArgv2, sizeof(int), 1, direArquivo);                          //Numero de Inodes
         //printf("\n auxArgv1: %i \t auxArgv2: %i", auxArgv1, auxArgv2);
-
-
-        if(0 == verDupDire(argv))
+        auxAr = (int)auxArgv2;
+       
+        if(0 == verDupDire(argv, 0))
         {
             idDirRaiz = posDiretorioRaiz(argv);                                         //
             printf("\n id Diretorio raiz: %i", idDirRaiz);
-            if(idDirRaiz == 0x01)
+            if(idDirRaiz == 0x00)
             {
                 idInode = achaInodoLivre(argv);
                 printf("\n ADICIONA DIRETORIO\n\tidInode: %i", idInode);
                 if(idInode != 0)
-                {
-                    posArq = 3 + retornaCeil(auxArgv1) + ((int)sizeof(INODE) * (idInode - 1));
-                    printf("\n posArq: %i", posArq);        
+                {    
+                    int idMB, troca;
+                        char auxTroca, posicaoVetorBloco;
+                        fseek(direArquivo, 0, SEEK_SET);
+                        posArq = 3;
+
+                    fseek(direArquivo, posArq++, SEEK_SET);
+                        fread(&auxTroca, sizeof(char), 1, direArquivo);
+                        sprintf(auxHEX, "%c", auxTroca);
+                        posArq = 3;
+                        posicaoVetorBloco = auxTroca;
+                        auxTroca = auxTroca + 1;
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        fwrite(&auxTroca, sizeof(char), 1, direArquivo);
+
+                    fseek(direArquivo, 0, SEEK_SET);
+                        posArq = 3 + retornaCeil(auxArgv1) + ((int)sizeof(INODE) * (idInode - 1));
+                        printf("\n posArq: %i", posArq);                     
+                        int idMapa = buscaVetor(argv);
+                        sprintf (auxENT, "%c", idMapa);  
+
                     fseek(direArquivo, posArq++, SEEK_SET);
                         sprintf (auxENT, "%c", 0x01);                   //IS_USED
                         fwrite(&auxENT, sizeof(char), 1, direArquivo); 
@@ -304,14 +278,18 @@ int   direSistemaArquivos       (char** argv)                           //Cria o
                     }
 
                     sprintf (auxENT, "%x", sizeNome);                   //char TAMANHO NOME
-                    printf("\n %s", auxHEX);
-                    aux = (int)strtol(auxENT, NULL, 10);
-                    fseek(direArquivo, posArq++, SEEK_SET);
-                    fwrite(&aux, sizeof(char), 1, direArquivo);         //TAMANHO NOME
+                        printf("\n %s", auxHEX);
+                        aux = (char)strtol(auxENT, NULL, 16);
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        fwrite(&aux, sizeof(int), 1, direArquivo);          //TAMANHO NOME
+                    
 
-                    sprintf (auxENT, "%c", 0x02);
+                    //fseek(direArquivo, posArq++, SEEK_SET);       
+                    //fwrite(&auxENT, sizeof(char), 1, direArquivo);
+                    //sprintf (auxENT, "%i", 0x03);
                     for(contX = 0; contX < 3; contX++)                  //Bloco direto      
                     {
+                        sprintf (auxENT, "%c", 0x7F);
                         fseek(direArquivo, posArq++, SEEK_SET);       
                         fwrite(&auxENT, sizeof(char), 1, direArquivo); 
                     }               
@@ -325,7 +303,28 @@ int   direSistemaArquivos       (char** argv)                           //Cria o
                     {   
                         fseek(direArquivo, posArq++, SEEK_SET);
                         fwrite(&auxENT, sizeof(char), 1, direArquivo); 
-                    } 
+                    }
+                    //Atualiza Vetor de Blocos
+                    posArq = 0;
+                        idMapa = buscaIdMapa(argv, idDirRaiz);
+                        fseek(direArquivo, 0, SEEK_SET);
+                        posArq = 4 + retornaCeil((int)auxArgv1) + (int)sizeof(INODE) * (int)auxArgv2 + idMapa ;
+                        printf("\n\n idMapa: %i - posArq: %i", idMapa, posArq);
+                        //printf("\n (int)sizeof(INODE) * idDirRaiz: %i", (int)sizeof(INODE) * idDirRaiz);
+                        sprintf (auxENT, "%c", idInode-1);                       //Não implementado
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        fwrite(&auxENT, sizeof(char), 1, direArquivo);
+
+                    //Atualiza Bloco Pai
+                    posArq = 0;
+                        //idMapa = buscaIdMapa(argv, idDirRaiz);
+                        fseek(direArquivo, 0, SEEK_SET);
+                        posArq = 3 + retornaCeil((int)auxArgv1) + 13 * (idPai + 1);
+                        //printf("\n\n idMapa: %i - posArq: %i", idMapa, posArq);
+                        //printf("\n (int)sizeof(INODE) * idDirRaiz: %i", (int)sizeof(INODE) * idDirRaiz);
+                        //sprintf (auxENT, "%c", idInode-1);                       //Não implementado
+                        fseek(direArquivo, posArq++, SEEK_SET);
+                        fwrite(&posicaoVetorBloco, sizeof(char), 1, direArquivo);
                 }
             }
         } 
@@ -339,8 +338,48 @@ int   direSistemaArquivos       (char** argv)                           //Cria o
 
 
 
+int     achaInodoLivre          (char** argv)                           //Acha o INODO livre
+{
+    char auxArgv1, auxArgv2, auxArgv3;
+	int idInode = 0, posArq = 1, contX = 0, contY = 0, aux;
+    FILE *arquivo;
+    arquivo = fopen(argv[1],"r+b");
+    if (arquivo!=NULL)                                                          //VERIFICA ARQUIVO .bin NO DIRETORIO
+    {
+        fseek(arquivo, posArq++, SEEK_SET);
+        fread(&auxArgv1, sizeof(int), 1, arquivo); 
+        fseek(arquivo, posArq++, SEEK_SET);
+        fread(&auxArgv2, sizeof(int), 1, arquivo); 
+        //printf("\n auxArgv1: %i - auxArgv2: %i", auxArgv1, auxArgv2);
 
-
+        posArq = 3 + retornaCeil(auxArgv1); // + auxArgv2 * sizeof(INODE);
+        fseek(arquivo, posArq++, SEEK_SET);
+        fread(&aux, sizeof(int), 1, arquivo); 
+    
+        //printf("\n posArq2: %i \t- auxArgv3: %i", posArq, auxArgv3);
+        idInode = 0; 
+        contY = 0;
+        for(contX = 0; contX < auxArgv2; contX++)
+        {   
+            //printf("\n posArq3: %i \t- auxArgv3: %i\n contX: %d \t- contY: %d ", posArq, auxArgv3, idInode, contY);
+            if ((aux == 0x00) || (aux == 0))
+            {
+                //printf("\n SAINDO: %d", idInode + 1);
+                fclose(arquivo);
+                return idInode + 1;                                            //Indice do diretorio raiz
+            }
+            posArq = 5 + retornaCeil(auxArgv1) + (int)sizeof(INODE) * (contX + 1);
+            
+            fseek(arquivo, posArq++, SEEK_SET);
+            fread(&auxArgv3, sizeof(int), 1, arquivo);
+            idInode = idInode + 1; 
+            contY = contY + 1;
+        }
+    }
+    fclose(arquivo);
+    printf("\n Sem espaço no INODO");
+    return 0;  
+}
 int   criaSistemaArquivos       (char** argv)                           //Cria o sistema de arquivos dentro do arquivo .bin
 {
     int aux;
@@ -376,7 +415,7 @@ int   criaSistemaArquivos       (char** argv)                           //Cria o
         ceilMax = retornaCeil((int)trocaBaseNB);
         //printf("\n Tamanho do Bloco: %i\n Numero de Bloco: %i\n Numero de Inodes: %i\n Numero Ceil: %f", trocaBaseTB, trocaBaseNB, trocaBaseNI, ceilMax);
 
-        novoINFO.mapaBits   = malloc((int)ceilMax * sizeof(char));                    //Aloca o Mapa de Bits com N/8 posições
+        novoINFO.mapaBits   = malloc((int)ceilMax * (int)sizeof(char));                    //Aloca o Mapa de Bits com N/8 posições
 
         for(contMapaBit = 0; contMapaBit < ceilMax; contMapaBit++)
         {  
@@ -384,7 +423,7 @@ int   criaSistemaArquivos       (char** argv)                           //Cria o
             //printf("\nMapa de Bits[%i]: %X, %i", contMapaBit, novoINFO.mapaBits[contMapaBit], novoINFO.mapaBits[contMapaBit]);
             fwrite(&novoINFO.mapaBits[contMapaBit], sizeof(char), 1, arquivo);   
         }
-        novoINFO.vetorInode = (INODE*)malloc(trocaBaseNI * sizeof(INODE));              //Aloca o Vetor de Inode com I posições
+        novoINFO.vetorInode = (INODE*)malloc(trocaBaseNI * (int)sizeof(INODE));              //Aloca o Vetor de Inode com I posições
         for(contInode = 0; contInode < trocaBaseNI; contInode++)
         {   
             //printf("\n Dentro do for para o Inode[%i]", contInode+1);
@@ -405,7 +444,7 @@ int   criaSistemaArquivos       (char** argv)                           //Cria o
 
             for(contX = 0; contX < 3; contX++)                                          //Blocos diretos
             {   
-                novoINFO.vetorInode[contInode].DIRECT_BLOCKS[contX] = 0x00;
+                novoINFO.vetorInode[contInode].DIRECT_BLOCKS[contX] =  0x00;
                 fwrite(&novoINFO.vetorInode[contInode].DIRECT_BLOCKS[contInode], sizeof(char), 1, arquivo); 
             }
             for(contX = 0; contX < 3; contX++)                                          //Blocos indiretos
@@ -422,10 +461,10 @@ int   criaSistemaArquivos       (char** argv)                           //Cria o
         novoINFO.indDir                 =   0x00;                                       //Posiciona o indice do diretorio raiz
         fwrite(&novoINFO.indDir, sizeof(char), 1, arquivo);  
         trocaBase = trocaBaseTB * trocaBaseNB;  
-        novoINFO.vetorBloco = (char*)malloc(trocaBase * sizeof(char));                  //Aloca o Vetor de Blocos com T * N Posições
+        novoINFO.vetorBloco = (char*)malloc(trocaBase * (int)sizeof(char));                  //Aloca o Vetor de Blocos com T * N Posições
         for(contBloco = 0; contBloco < (trocaBaseNI * trocaBaseTB); contBloco++)
         {
-            novoINFO.vetorBloco[contBloco]  =  0x00;//(int)strtol("3", NULL, 10);       //Recebe o vetor de bloco
+            novoINFO.vetorBloco[contBloco]  =  0x7F;//(int)strtol("3", NULL, 10);       //Recebe o vetor de bloco
             fwrite(&novoINFO.vetorBloco[contBloco], sizeof(char), 1, arquivo);
         }
     }
@@ -461,7 +500,11 @@ int     addPastaRaiz            (char** argv)                           //Adicio
         trocaBaseTB = (int)strtol(argv[2], NULL, 10);                                   //Converte entrada
         trocaBaseNB = (int)strtol(argv[3], NULL, 10);                                   //Converte entrada
         trocaBaseNI = (int)strtol(argv[4], NULL, 10);                                   //Converte entrada
-        posArq = 3 + (int)retornaCeil(trocaBaseNB);                                     //Atualiza posição de entrada
+        posArq = 3;                                                                      //Atualiza posição de entrada
+            sprintf (auxENT, "%c", 0x00);                                                   //Atualiza usado
+        fseek(arquivoRaiz, posArq++, SEEK_SET);                                           
+            fwrite(&auxENT, sizeof(char), 1, arquivoRaiz);
+        posArq = posArq + (int)retornaCeil(trocaBaseNB) -1;
         sprintf (auxENT, "%c", 0x01);                                                   //Atualiza usado
         fseek(arquivoRaiz, posArq++, SEEK_SET);                                           
             fwrite(&auxENT, sizeof(char), 1, arquivoRaiz);
@@ -480,29 +523,36 @@ int     addPastaRaiz            (char** argv)                           //Adicio
         sprintf (auxENT, "%c", 0x01);                                                   //Atualiza diretorio
         fseek(arquivoRaiz, posArq++, SEEK_SET);                                           
             fwrite(&auxENT, sizeof(char), 1, arquivoRaiz);
-        for(contX = 0; contX < 3; contX++)
+
+        sprintf (auxENT, "%c", 0x7F);                                                   //Atualiza bloco direto
+        fseek(arquivoRaiz, posArq++, SEEK_SET);                                           
+            fwrite(&auxENT, sizeof(char), 1, arquivoRaiz); 
+        for(contX = 0; contX < 2; contX++)
         {
-            sprintf (auxENT, "%c", 0x00);                                               //Atualiza bloco direto
+            sprintf (auxENT, "%c", 0x7F);                                               //Atualiza bloco direto
             fseek(arquivoRaiz, posArq++, SEEK_SET);                                           
                 fwrite(&auxENT, sizeof(char), 1, arquivoRaiz); 
         }
         for(contX = 0; contX < 3; contX++)
         {
-            sprintf (auxENT, "%c", 0x24);                                               //Atualiza bloco indireto
+            sprintf (auxENT, "%c", 0x00);                                               //Atualiza bloco indireto
             fseek(arquivoRaiz, posArq++, SEEK_SET);                                           
                 fwrite(&auxENT, sizeof(char), 1, arquivoRaiz); 
         }
         for(contX = 0; contX < 3; contX++)
         {
-            sprintf (auxENT, "%c", 0x23);                                               //Atualiza bloco duplamente indireto
+            sprintf (auxENT, "%c", 0x00);                                               //Atualiza bloco duplamente indireto
             fseek(arquivoRaiz, posArq++, SEEK_SET);                                           
                 fwrite(&auxENT, sizeof(char), 1, arquivoRaiz); 
         } 
 
         posArq = 3 + (int)retornaCeil(trocaBaseNB) + trocaBaseNI * (int)sizeof(INODE);  //Atualiza posição de entrada
-        sprintf (auxENT, "%c", 0x61);                                                   //Atualiza usado
+        sprintf (auxENT, "%c", 0x00);                                                   //Atualiza usado
         fseek(arquivoRaiz, posArq++, SEEK_SET);                                           
-            fwrite(&auxENT, sizeof(char), 1, arquivoRaiz);
+            fwrite(&auxENT, sizeof(char), 1, arquivoRaiz);        
+        sprintf (auxENT, "%c", 0x00);                                                   //Vetor de blocos
+        //fseek(arquivoRaiz, posArq++, SEEK_SET);                                           
+        //   fwrite(&auxENT, sizeof(char), 1, arquivoRaiz);
     }
     fclose(arquivoRaiz);
     return 0;
@@ -520,10 +570,12 @@ int     posDiretorioRaiz        (char** argv)                           //Funç�
         fseek(arquivo, posArq++, SEEK_SET);
         fread(&auxArgv2, sizeof(int), 1, arquivo); 
         posArq = posArq + retornaCeil(auxArgv1) + (int)auxArgv2 * sizeof(INODE);
-        printf("\nposArq: %i - Ceil: %i", posArq, (int)retornaCeil(auxArgv1));
+            printf("\n TESTE");
+        //printf("\nposArq: %i - Ceil: %i", posArq, (int)retornaCeil(auxArgv1));
         fseek(arquivo, posArq++, SEEK_SET);
             fread(&idInode, sizeof(int), 1, arquivo);
         sprintf (auxHEX, "%c", idInode);
+            printf("\n TESTE");
         auxId = (int)strtol(auxHEX, NULL, 16); 
 
         //printf("\nauxArgv1: %i - auxArgv2: %i - posArq: %i - idInode: %i - auxHEX: %s", auxArgv1, auxArgv2, posArq, idInode, auxHEX);
@@ -611,9 +663,9 @@ int     buscaMapa               (char** argv, int idPai, int idMapa)
     fclose(arquivoBuscaMapa);
     return troca;
 }
-int     verDupDire              (char** argv)
+int     verDupDire              (char** argv, int  idPai)
 {
-    int tamEntrada = strlen(argv[2]), tamanhoRaiz, idInode = 0, posArq = 0, contX = 1, contY, idPai = 0;
+    int tamEntrada = strlen(argv[2]), tamanhoRaiz, idInode = 0, posArq = 0, contX = 1, contY;
     char auxRaiz[tamEntrada], auxRaizRaiz[tamEntrada], auxArquivo[tamEntrada], adicionar[tamEntrada], lido[10];
     char carac, auxArgv1, auxArgv2, auxArgv3, auxHEX[10], auxENT[10];
     int existe = 0;
@@ -657,12 +709,11 @@ int     verDupDire              (char** argv)
         posArq = 0;
         posArq = 3 + retornaCeil(auxArgv2) + 4;
         contX = 0;
-        int idBloc = 0, idMapa = 0 , idPai = 0, idNode;
+        int idBloc = 0, idMapa = 0 , idNode;
         char carac;
         int nauxArgv3 = auxArgv3;
-        while((existe != 1) && (contY < nauxArgv3))
+        for(contY = 0; contY < nauxArgv3; contY++)
         {
-            
             //printf("\n PROXIMO INODE");
             contX = 0;
             sprintf(lido, "/");
@@ -680,16 +731,107 @@ int     verDupDire              (char** argv)
                 printf("\n Pasta existe\t idPai: %i", idPai);
                 return existe;
             }
+            
             contY = contY + 1;
             fseek(verDup, 0, SEEK_SET);
             idMapa = buscaBloco(argv, idPai, idBloc);
             idNode = buscaMapa(argv, idPai, idMapa);
 
 
-            posArq = posArq + 10 + (10 - contX) *(int)idNode;
+            posArq = posArq + 10 + (10 - contX) * (int)idNode;
         }
         printf("\n Não existe");
     }
     fclose(verDup);
     return existe;
+}
+int     buscaIdMapa             (char** argv, int idPai)
+{
+    int posArq = 0, troca, troca2, contY = 0, livre = 1, idMapa = 0;
+    char dadoMapa,auxArgv1, auxArgv2, auxArgv3, auxTroca[10];
+    FILE *arquivoBuscaMapa;
+
+    arquivoBuscaMapa = fopen(argv[1],"r+b");
+    if (arquivoBuscaMapa != NULL)                                                            //VERIFICA ARQUIVO .bin NO DIRETORIO
+    {    
+
+            //printf("\n idPai: %i \t idBloc: %i ", idPai, idBloc);
+            fseek(arquivoBuscaMapa, posArq++, SEEK_SET);
+                fread(&auxArgv1, sizeof(char), 1, arquivoBuscaMapa); 
+            fseek(arquivoBuscaMapa, posArq++, SEEK_SET);
+                fread(&auxArgv2, sizeof(char), 1, arquivoBuscaMapa); 
+            fseek(arquivoBuscaMapa, posArq++, SEEK_SET);
+                fread(&auxArgv3, sizeof(char), 1, arquivoBuscaMapa);
+        
+        while((contY < 3) && (livre != 0))
+        {
+            contY = contY + 1;
+            idMapa = buscaBloco (argv, idPai, contY);
+
+            fseek(arquivoBuscaMapa, 0, SEEK_SET);
+            posArq = 4 + retornaCeil((int)auxArgv2) + ((int)auxArgv3 * (int)sizeof(INODE)) + idMapa;
+            
+            fseek(arquivoBuscaMapa, posArq++, SEEK_SET);
+                fread(&dadoMapa, sizeof(char), 1, arquivoBuscaMapa);
+            sprintf (auxTroca, "%i", dadoMapa);
+            
+
+            troca = (int)strtol(auxTroca, NULL, 10); 
+            troca2 = (int)strtol(auxTroca, NULL, 16); 
+            //printf("\n troca: %i \t troca: %c \t troca: %c \t\n troca2: %c \t troca2: %i \t troca2: %i", troca, troca, troca, troca2, troca2, troca2);
+            if(dadoMapa == 127)
+            {
+                printf("\n MAPA DE BITS VAZIO, idMapa: %i", idMapa);
+                livre = 0;
+            }
+        }
+        if(contY < 3)
+        {   
+            printf("\nTeste");
+            char auxENT[10];
+            int auxMapaAdd;
+            posArq = 3 + 1;
+            fseek(arquivoBuscaMapa, posArq++, SEEK_SET);
+                fread(&auxMapaAdd, sizeof(char), 1, arquivoBuscaMapa);
+
+            posArq = 4 + retornaCeil((int)auxArgv2) + 13 + contY;
+            sprintf (auxENT, "%c", auxMapaAdd + 1);                       //Não implementado
+            fseek(arquivoBuscaMapa, posArq++, SEEK_SET);
+                    fwrite(&auxENT, sizeof(char), 1, arquivoBuscaMapa);
+        }
+    }
+    fclose(arquivoBuscaMapa);
+    return idMapa;
+}
+int     buscaVetor              (char** argv)
+{
+    int posArq = 0, troca, troca2, contY = 0, livre = 1, idMapa = 0;
+    char auxArgv1, auxArgv2, auxArgv3, auxTroca[10], dadoMapa = 0;
+    FILE *arquivoBuscaMapa;
+
+    arquivoBuscaMapa = fopen(argv[1],"r+b");
+    if (arquivoBuscaMapa != NULL)                                                            //VERIFICA ARQUIVO .bin NO DIRETORIO
+    {    
+        fseek(arquivoBuscaMapa, posArq++, SEEK_SET);
+            fread(&auxArgv1, sizeof(char), 1, arquivoBuscaMapa); 
+        fseek(arquivoBuscaMapa, posArq++, SEEK_SET);
+            fread(&auxArgv2, sizeof(char), 1, arquivoBuscaMapa); 
+        fseek(arquivoBuscaMapa, posArq++, SEEK_SET);
+            fread(&auxArgv3, sizeof(char), 1, arquivoBuscaMapa);
+        
+        while((contY < (int)retornaCeil(auxArgv2)) && (dadoMapa < 15))
+        {
+            fseek(arquivoBuscaMapa, posArq++, SEEK_SET);
+                fread(&dadoMapa, sizeof(char), 1, arquivoBuscaMapa);
+            sprintf (auxTroca, "%i", dadoMapa);
+            
+
+            troca = (int)strtol(auxTroca, NULL, 10); 
+            troca2 = (int)strtol(auxTroca, NULL, 16); 
+            //printf("\n troca: %i \t troca: %c \t troca: %c \t\n troca2: %c \t troca2: %i \t troca2: %i", troca, troca, troca, troca2, troca2, troca2);
+            contY = contY + 1;
+        }
+    }
+    fclose(arquivoBuscaMapa);
+    return troca;   
 }
