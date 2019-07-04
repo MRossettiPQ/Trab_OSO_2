@@ -73,7 +73,7 @@ int main                    ()
         
         getcwd(pathSis, sizeof(pathSis));                                   //Busca o PATH do diretorio do programa
         auxSprintf = sprintf(cmdCC, "%s/%s", pathSis, argv[1]);             //Gera o PATH para o arquivo desejado
-        printf("\n\nPath: %s\nHash: ", cmdCC);                              //Imprime o PATH do diretorio do programa
+        //printf("\n\nPath: %s\nHash: ", cmdCC);                              //Imprime o PATH do diretorio do programa
         printSha256(cmdCC);                                                 //Imprime a HASH
     }
     else if(0 == strcmp(argv[0], "add"))
@@ -84,7 +84,7 @@ int main                    ()
         printf("\n Arquivo Adicionado ao Sistema de Arquivos Criado\n");
         getcwd(pathSis, sizeof(pathSis));                                   //Busca o PATH do diretorio do programa
         auxSprintf = sprintf(cmdCC, "%s/%s", pathSis, argv[1]);             //Gera o PATH para o arquivo desejado
-        printf("\n\nPath: %s\nHash: ", cmdCC);                              //Imprime o PATH do diretorio do programa
+        //printf("\n\nPath: %s\nHash: ", cmdCC);                              //Imprime o PATH do diretorio do programa
         printSha256(cmdCC);                                                 //Imprime a HASH
     }
     else if(0 == strcmp(argv[0], "addDir"))
@@ -95,7 +95,7 @@ int main                    ()
         printf("\n Diretorio Adicionado ao Sistema de Arquivos Criado\n");
         getcwd(pathSis, sizeof(pathSis));                                   //Busca o PATH do diretorio do programa
         auxSprintf = sprintf(cmdCC, "%s/%s", pathSis, argv[1]);             //Gera o PATH para o arquivo desejado
-        printf("\n\nPath: %s\nHash: ", cmdCC);                              //Imprime o PATH do diretorio do programa
+        //printf("\n\nPath: %s\nHash: ", cmdCC);                              //Imprime o PATH do diretorio do programa
         printSha256(cmdCC);                                                 //Imprime a HASH
     }    
     else if(0 == strcmp(argv[0], "sha256"))
@@ -553,7 +553,7 @@ int   criaSistemaArquivos       (char** argv)                           //Cria o
         ceilMax = retornaCeil((int)trocaBaseNB);
         //printf("\n Tamanho do Bloco: %i\n Numero de Bloco: %i\n Numero de Inodes: %i\n Numero Ceil: %f", trocaBaseTB, trocaBaseNB, trocaBaseNI, ceilMax);
 
-        novoINFO.mapaBits   = malloc((int)ceilMax * (int)sizeof(char));                    //Aloca o Mapa de Bits com N/8 posições
+        novoINFO.mapaBits   = (char)malloc((int)ceilMax * (int)sizeof(char));                    //Aloca o Mapa de Bits com N/8 posições
 
         for(contMapaBit = 0; contMapaBit < ceilMax; contMapaBit++)
         {  
