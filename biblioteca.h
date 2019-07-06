@@ -37,9 +37,8 @@
     int     buscaMapa               (char** argv, int idPai, int idMapa);
     int     buscaIdMapa             (char** argv, int idPai);
     int     buscaVetor              (char** argv);
-    int     idDirPai                (char** argv);
+
     double  retornaCeil             (double numInodes);
-    int     ACHAPAI              (char** argv, int  idPai);
 
     typedef struct  
     {
